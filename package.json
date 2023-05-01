@@ -16,9 +16,13 @@
   "devDependencies": {
     "chai": "^4.3.7",
     "chai-as-promised": "^7.1.1",
-    "lodash.clonedeep": "^4.5.0",
     "mocha": "^10.2.0",
-    "mongo-mock": "^4.2.0",
-    "rfc6902": "^5.0.1"
+    "mongodb": "^5.3.0",
+    "mongodb-memory-server": "^8.12.2"
+  },
+  "dependencies": {
+    "lodash.clonedeep": "^4.5.0",
+    "rfc6902": "^5.0.1",
+    "uuid": "^9.0.0"
   }
 }
