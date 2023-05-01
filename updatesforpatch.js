@@ -1,3 +1,84 @@
+import { applyPatch } from 'rfc6902';
+import cloneDeep from 'lodash.clonedeep';
+
+function getValue(document, remainingPathElements) {
+    if (remainingPathElements.length === 0) { return document; }
+    const field = remainingPathElements.shift();
+    const parentValue = document[field];
+    if (parentValue) {
+        return getValue(parentValue, remainingPathElements);
+    } else {
+        return undefined; // path does not exist to recurse to
+    }
+}
+
+function deconstructPath(patchPath, document) {
+    if (!patchPath || !patchPath.startsWith('/')) {
+        throw new Error('invalid path for operation');
+    }
+
+    const pathElements = patchPath.split('/'); 
+    pathElements.shift(); // Remove the empty path element produced by the leading slash
+    const fieldName = pathElements.pop();
+    // Now pathElements will contain the path of the parent of the value being operated on
+
+    const parentValue = getValue(document, pathElements);
+    if (!parentValue) {
+        throw new Error('path does not exist');
+    }
+    let value;
+    if (fieldName === '-') {
+        // Path deliberately refers to a value we know doesn't already exist
+        value = undefined;
+    } else if (typeof(parentValue) === 'object') {
+        // Try and look up the field's value in the parent (might be an array or an object)
+        value = parentValue[fieldName];
+    }
+    const parentMongoPath = pathElements.join('.');
+    const mongoPath = [...pathElements, fieldName].join('.');
+    return {
+        fieldName,
+        value,
+        parentValue,
+        parentMongoPath,
+        mongoPath,
+    };
+}
+
+function pathRefersToArrayChild(deconstructedPath) {
+    const { parentValue } = deconstructedPath;
+    return Array.isArray(parentValue);
+}
+
+function pathRefersToEndOfArray(deconstructedPath) {
+    const { parentValue, fieldName } = deconstructedPath;
+    return Array.isArray(parentValue) && (fieldName === '-');
+}
+
+function updatesForAddOperation(operation, currentDocument) {
+    const deconstructedPath = deconstructPath(operation.path, currentDocument);
+    if (pathRefersToArrayChild(deconstructedPath)) {
+        if (pathRefersToEndOfArray(deconstructedPath)) {
+            return updatesForArrayAppend(operation, deconstructedPath, currentDocument);
+        } else {
+            return updatesForArrayInsert(operation, deconstructedPath, currentDocument);
+        }
+    } else {
+        return updatesForFieldAdd(operation, deconstructedPath, currentDocument);
+    }
+}
+
+function updatesForFieldAdd(operation, deconstructedPath, currentDocument) {
+    const { value: previousValue, mongoPath } = deconstructedPath;
+    if (previousValue !== undefined) { throw new Error('add refers to already existing field (use replace)'); }
+
+    return [{
+        $set: {
+            [mongoPath]: operation.value,
+        }
+    }];
+}
+
 /** @returns Array of MongoDB update statements that, if applied 
  * in order, will transform the original document in the manner
  * described by the patch document.
@@ -11,5 +92,33 @@
  * exist), an Error will be thrown detailing the operation which failed
  */
 export default function updatesForPatch(patch, originalDocument) {
-    return [];
+    if (!Array.isArray(patch)) { throw new Error('malformed patch document (not an array)'); }
+    if (!originalDocument) { throw new Error('malformed original document'); }
+
+    const updates = [];
+    const currentDocument = cloneDeep(originalDocument);
+    for (const operation of patch) {
+        if (typeof(operation) !== 'object') { throw new Error('malformed patch operation') }
+
+        if (operation.op === 'add') {
+            updates.push(...updatesForAddOperation(operation, currentDocument));
+        } else if (operation.op === 'remove') {
+            updates.push(...updatesForRemoveOperation(operation, currentDocument));
+        } else if (operation.op === 'replace') {
+            updates.push(...updatesForReplaceOperation(operation, currentDocument));
+        } else if (operation.op === 'copy') {
+            updates.push(...updatesForCopyOperation(operation, currentDocument));
+        } else if (operation.op === 'move') {
+            updates.push(...updatesForMoveOperation(operation, currentDocument));
+        } else if (operation.op === 'test') {
+            if (!passesTestOperation(operation, currentDocument)) {
+                return []; // Failed test, whole patch should not be applied
+            }
+        } else {
+            throw new Error('malformed patch operation (unknown or missing op field');
+        }
+
+        applyPatch(currentDocument, [operation]); // Apply just this operation to the document to track its current state
+    }
+    return updates;
 }

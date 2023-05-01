@@ -14,7 +14,7 @@ describe('Updates For Patch', async function() {
 
         it('should support add value operations', async function() {
             await checkUpdatesProduceCorrectResult('should support add value operations', exampleDocument, [
-                { "op": "replace", "path": "/baz", "value": "boo" },
+                { "op": "add", "path": "/bar", "value": "mux" },
             ]); 
         });
         it('should support remove value operations');
@@ -28,6 +28,9 @@ describe('Updates For Patch', async function() {
         it('should support move operations');
         it('should support move operations from arrays');
         it('should support move operations to arrays');
+
+        it('should not modify the original document passed in');
+        it('should not modify the patch document passed in');
     });
 
     describe('Test operations', async function() {
@@ -37,7 +40,8 @@ describe('Updates For Patch', async function() {
     describe('Incompatibility  tests', async function() {
         it('should refuse to apply patches where paths contain characters MongoDB does not support');
         it('should refuse to apply patches where values contain characters MongoDB does not support');
-        it('should refuse to perform update operations if the field did not exist in the original document');
+        it('should refuse to perform add operations if the field did exist in the original document');
+        it('should refuse to perform replace operations if the field did not exist in the original document');
         it('should refuse to perform add-to-end-of-array operations if the field specified is not an array');
         it('should refuse to perform insert mid-array operations if the field specified is not an array or an object');
         it('should refuse to perform remove operations if the field specified is not an array or an object');

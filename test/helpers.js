@@ -35,7 +35,7 @@ export async function clearCollection() {
 }
 
 export async function applyPatchUpdates(query, updates) {
-    for await (const update of updates) {
+    for (const update of updates) {
         const updateResult = await collection.updateOne(query, update);
         expect(updateResult.result.ok).to.equal(1);
     }
@@ -46,7 +46,7 @@ export async function checkUpdatesProduceCorrectResult(message, originalDocument
     expect(insertResult.result.ok).to.equal(1);
     const query = { _id: insertResult.insertedId };
 
-    const updates = updatesForPatch(patch);
+    const updates = updatesForPatch(patch, originalDocument);
     expect(updates).to.be.a('array');
     await applyPatchUpdates(query, updates);
 
