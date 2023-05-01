@@ -1,5 +1,8 @@
-import { expect } from 'chai';
+import chai, { expect } from 'chai';
+import chaiAsPromised from 'chai-as-promised';
 import { openDB, closeDB, clearCollection, checkUpdatesProduceCorrectResult } from './helpers.js';
+
+chai.use(chaiAsPromised);
 
 describe('Updates For Patch', async function() {
     before('Set up mongo server', openDB);
@@ -9,22 +12,29 @@ describe('Updates For Patch', async function() {
     describe('Basic operations', async function() {
         const exampleDocument = {
             foo: 'bar',
-            baz: ['bux'],
+            baz: ['bux', 'tux'],
         };
 
         it('should support add value operations', async function() {
-            await checkUpdatesProduceCorrectResult('should support add value operations', exampleDocument, [
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
                 { "op": "add", "path": "/bar", "value": "mux" },
             ]); 
         });
         it('should support remove value operations');
         it('should support replace value operations');
         it('should support add to end of array operations', async function() {
-            await checkUpdatesProduceCorrectResult('should support add value operations', exampleDocument, [
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
                 { "op": "add", "path": "/baz/-", "value": "mux" },
             ]); 
         });
-        it('should support insert mid-array operations');
+        it('should support insert mid-array operations', async function() {
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "add", "path": "/baz/0", "value": "mux" },
+            ]); 
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "add", "path": "/baz/1", "value": "mux" },
+            ]);
+        });
         it('should support remove mid-array operations');
         it('should support copy operations');
         it('should support copy operations from arrays');
@@ -35,6 +45,12 @@ describe('Updates For Patch', async function() {
 
         it('should not modify the original document passed in');
         it('should not modify the patch document passed in');
+
+        it('should refuse to add to an index outside of the bounds of the array', async function() {
+            await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "add", "path": "/baz/2", "value": "mux" },
+            ])).to.be.rejectedWith('non-existent index');
+        });
     });
 
     describe('Test operations', async function() {

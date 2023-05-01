@@ -90,6 +90,23 @@ function updatesForArrayAppend(operation, deconstructedPath, currentDocument) {
     }];
 }
 
+function updatesForArrayInsert(operation, deconstructedPath, currentDocument) {
+    const { parentMongoPath, fieldName, parentValue } = deconstructedPath;
+    const index = parseInt(fieldName);
+    if (index >= parentValue.length) {
+        throw new Error('path refers to non-existent index');
+    }
+
+    return [{
+        $push: {
+            [parentMongoPath]: {
+                $each: [operation.value],
+                $position: index,
+            },
+        }
+    }];
+}
+
 /** @returns Array of MongoDB update statements that, if applied 
  * in order, will transform the original document in the manner
  * described by the patch document.
