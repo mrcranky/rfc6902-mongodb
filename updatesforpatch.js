@@ -1,8 +1,9 @@
 import { applyPatch } from 'rfc6902';
 import cloneDeep from 'lodash.clonedeep';
 
-function getValue(document, remainingPathElements) {
-    if (remainingPathElements.length === 0) { return document; }
+function getValue(document, pathElements) {
+    if (pathElements.length === 0) { return document; }
+    const remainingPathElements = [...pathElements]; //Deliberately clone so the caller isn't affected
     const field = remainingPathElements.shift();
     const parentValue = document[field];
     if (parentValue) {
@@ -75,6 +76,16 @@ function updatesForFieldAdd(operation, deconstructedPath, currentDocument) {
     return [{
         $set: {
             [mongoPath]: operation.value,
+        }
+    }];
+}
+
+function updatesForArrayAppend(operation, deconstructedPath, currentDocument) {
+    const { parentMongoPath } = deconstructedPath;
+
+    return [{
+        $push: {
+            [parentMongoPath]: operation.value,
         }
     }];
 }

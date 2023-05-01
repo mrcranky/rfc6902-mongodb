@@ -8,8 +8,8 @@ describe('Updates For Patch', async function() {
 
     describe('Basic operations', async function() {
         const exampleDocument = {
-            baz: 'qux',
             foo: 'bar',
+            baz: ['bux'],
         };
 
         it('should support add value operations', async function() {
@@ -19,7 +19,11 @@ describe('Updates For Patch', async function() {
         });
         it('should support remove value operations');
         it('should support replace value operations');
-        it('should support add to end of array operations');
+        it('should support add to end of array operations', async function() {
+            await checkUpdatesProduceCorrectResult('should support add value operations', exampleDocument, [
+                { "op": "add", "path": "/baz/-", "value": "mux" },
+            ]); 
+        });
         it('should support insert mid-array operations');
         it('should support remove mid-array operations');
         it('should support copy operations');
