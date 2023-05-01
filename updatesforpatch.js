@@ -1,5 +1,6 @@
 import { applyPatch } from 'rfc6902';
 import cloneDeep from 'lodash.clonedeep';
+import { v4 as uuid } from 'uuid';
 
 function getValue(document, pathElements) {
     if (pathElements.length === 0) { return document; }
@@ -93,7 +94,7 @@ function updatesForArrayAppend(operation, deconstructedPath, currentDocument) {
 function updatesForArrayInsert(operation, deconstructedPath, currentDocument) {
     const { parentMongoPath, fieldName, parentValue } = deconstructedPath;
     const index = parseInt(fieldName);
-    if (index >= parentValue.length) {
+    if ((index < 0) || (index >= parentValue.length)) {
         throw new Error('path refers to non-existent index');
     }
 
@@ -105,6 +106,44 @@ function updatesForArrayInsert(operation, deconstructedPath, currentDocument) {
             },
         }
     }];
+}
+
+function updatesForRemoveOperation(operation, currentDocument) {
+    const deconstructedPath = deconstructPath(operation.path, currentDocument);
+    if (pathRefersToArrayChild(deconstructedPath)) {
+        return updatesForArrayRemove(operation, deconstructedPath, currentDocument);
+    } else {
+        return updatesForFieldRemove(operation, deconstructedPath, currentDocument);
+    }
+}
+
+function updatesForFieldRemove(operation, deconstructedPath, currentDocument) {
+    const { value: previousValue, mongoPath } = deconstructedPath;
+    if (previousValue === undefined) { throw new Error('remove refers to non-existant field'); }
+
+    return [{
+        $unset: {
+            [mongoPath]: true,
+        }
+    }];
+}
+
+function updatesForArrayRemove(operation, deconstructedPath, currentDocument) {
+    const { parentMongoPath, mongoPath, fieldName, parentValue } = deconstructedPath;
+    const index = parseInt(fieldName);
+    if ((index < 0) || (index >= parentValue.length)) {
+        throw new Error('path refers to non-existent index');
+    }
+
+    // MongoDB does not currently support an easy removal of an item from within an 
+    // array by index, only by value.
+    // We kludge around this by setting the array item to a unique value and then 
+    // pulling that value out in a separate operation
+    const uniqueValue = uuid();
+    return [
+        { $set: { [mongoPath]: uniqueValue } },
+        { $pull: { [parentMongoPath]: uniqueValue } },
+    ];
 }
 
 /** @returns Array of MongoDB update statements that, if applied 

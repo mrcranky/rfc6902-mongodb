@@ -9,18 +9,22 @@ describe('Updates For Patch', async function() {
     after('Close client', closeDB);
     afterEach('Clear collection', clearCollection);
 
-    describe('Basic operations', async function() {
-        const exampleDocument = {
-            foo: 'bar',
-            baz: ['bux', 'tux'],
-        };
+    const exampleDocument = {
+        foo: 'bar',
+        baz: ['bux', 'tux'],
+    };
 
+    describe('Basic operations', async function() {
         it('should support add value operations', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
                 { "op": "add", "path": "/bar", "value": "mux" },
             ]); 
         });
-        it('should support remove value operations');
+        it('should support remove value operations', async function() {
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "remove", "path": "/foo" },
+            ]); 
+        });
         it('should support replace value operations');
         it('should support add to end of array operations', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
@@ -35,7 +39,14 @@ describe('Updates For Patch', async function() {
                 { "op": "add", "path": "/baz/1", "value": "mux" },
             ]);
         });
-        it('should support remove mid-array operations');
+        it('should support remove mid-array operations', async function() {
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "remove", "path": "/baz/0" },
+            ]); 
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "remove", "path": "/baz/1" },
+            ]); 
+        });
         it('should support copy operations');
         it('should support copy operations from arrays');
         it('should support copy operations to arrays');
@@ -45,10 +56,23 @@ describe('Updates For Patch', async function() {
 
         it('should not modify the original document passed in');
         it('should not modify the patch document passed in');
+    });
 
+    describe('Validity checking', async function() {
         it('should refuse to add to an index outside of the bounds of the array', async function() {
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "add", "path": "/baz/-1", "value": "mux" },
+            ])).to.be.rejectedWith('non-existent index');
+            await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
                 { "op": "add", "path": "/baz/2", "value": "mux" },
+            ])).to.be.rejectedWith('non-existent index');
+        });
+        it('should refuse to remove an index outside of the bounds of the array', async function() {
+            await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "remove", "path": "/baz/-1", "value": "mux" },
+            ])).to.be.rejectedWith('non-existent index');
+            await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "remove", "path": "/baz/2", "value": "mux" },
             ])).to.be.rejectedWith('non-existent index');
         });
     });
