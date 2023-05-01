@@ -1,6 +1,7 @@
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { openDB, closeDB, clearCollection, checkUpdatesProduceCorrectResult } from './helpers.js';
+import cloneDeep from 'lodash.clonedeep';
 
 chai.use(chaiAsPromised);
 
@@ -93,12 +94,25 @@ describe('Updates For Patch', async function() {
                 { "op": "move", "from": "/foo", "path": "/baz/0" },
             ]);
         });
-
-        it('should not modify the original document passed in');
-        it('should not modify the patch document passed in');
     });
 
     describe('Validity checking', async function() {
+        it('should not modify the original document passed in', async function() {
+            const documentPrior = cloneDeep(exampleDocument);
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "move", "from": "/foo", "path": "/baz/0" },
+            ]);
+            expect(documentPrior).to.deep.equal(exampleDocument);
+        });
+        it('should not modify the patch document passed in', async function() {
+            const patch = [
+                { "op": "move", "from": "/foo", "path": "/baz/0" },
+            ];
+            const patchPrior = cloneDeep(patch);
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, patch);
+            expect(patchPrior).to.deep.equal(patch);
+        });
+
         it('should refuse to add to an index outside of the bounds of the array', async function() {
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
                 { "op": "add", "path": "/baz/-1", "value": "mux" },
