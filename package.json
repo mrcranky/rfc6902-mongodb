@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Helper module for generating a sequence of MongoDB document update operations that will transform a document in line with an RFC6902 JSON Patch document.",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "mocha"
   },
@@ -11,5 +12,10 @@
     "mongodb"
   ],
   "author": "Chris Chapman",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "mocha": "^10.2.0",
+    "mongo-mock": "^4.2.0"
+  }
 }
