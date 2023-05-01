@@ -146,6 +146,18 @@ function updatesForArrayRemove(operation, deconstructedPath, currentDocument) {
     ];
 }
 
+function updatesForReplaceOperation(operation, currentDocument) {
+    const deconstructedPath = deconstructPath(operation.path, currentDocument);
+    const { value: previousValue, mongoPath } = deconstructedPath;
+    if (previousValue === undefined) { throw new Error('replace refers to path which does not exist (use add)'); }
+
+    return [{
+        $set: {
+            [mongoPath]: operation.value,
+        }
+    }];
+}
+
 /** @returns Array of MongoDB update statements that, if applied 
  * in order, will transform the original document in the manner
  * described by the patch document.

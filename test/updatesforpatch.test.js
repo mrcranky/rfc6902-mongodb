@@ -25,7 +25,11 @@ describe('Updates For Patch', async function() {
                 { "op": "remove", "path": "/foo" },
             ]); 
         });
-        it('should support replace value operations');
+        it('should support replace value operations', async function() {
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "replace", "path": "/foo", value: "baz" },
+            ]); 
+        });
         it('should support add to end of array operations', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
                 { "op": "add", "path": "/baz/-", "value": "mux" },
@@ -45,6 +49,12 @@ describe('Updates For Patch', async function() {
             ]); 
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
                 { "op": "remove", "path": "/baz/1" },
+            ]); 
+        });
+
+        it('should support replace value mid-array operations', async function() {
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "replace", "path": "/baz/0", value: "mux" },
             ]); 
         });
         it('should support copy operations');
@@ -75,13 +85,20 @@ describe('Updates For Patch', async function() {
                 { "op": "remove", "path": "/baz/2", "value": "mux" },
             ])).to.be.rejectedWith('non-existent index');
         });
-    });
+        it('should refuse to replace an index outside of the bounds of the array', async function() {
+            await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "replace", "path": "/baz/-1", "value": "mux" },
+            ])).to.be.rejectedWith('path which does not exist');
+            await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "replace", "path": "/baz/2", "value": "mux" },
+            ])).to.be.rejectedWith('path which does not exist');
+        });
+        it('should refuse to replace a field which does not exist', async function() {
+            await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "replace", "path": "/notreal", "value": "mux" },
+            ])).to.be.rejectedWith('path which does not exist');
+        });
 
-    describe('Test operations', async function() {
-        it('should apply patches only if the original document matches conditions specified in test operations');
-    });
-
-    describe('Incompatibility  tests', async function() {
         it('should refuse to apply patches where paths contain characters MongoDB does not support');
         it('should refuse to apply patches where values contain characters MongoDB does not support');
         it('should refuse to perform add operations if the field did exist in the original document');
@@ -90,6 +107,10 @@ describe('Updates For Patch', async function() {
         it('should refuse to perform insert mid-array operations if the field specified is not an array or an object');
         it('should refuse to perform remove operations if the field specified is not an array or an object');
         it('should refuse to perform remove mid-array operations if the field specified is not an array or an object');
+    });
+
+    describe('Test operations', async function() {
+        it('should apply patches only if the original document matches conditions specified in test operations');
     });
 
     describe('Efficiency tests', async function() {
