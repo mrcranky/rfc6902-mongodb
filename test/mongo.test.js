@@ -1,12 +1,5 @@
 import { expect } from 'chai';
-import mongodb from 'mongo-mock';
-const { MongoClient } = mongodb;
-mongodb.max_delay = 0; // choose to NOT pretend wait for async operations
-
-// Connection URL
-const dbURL = 'mongodb://localhost:27017/test';
-// Use connect method to connect to the Server
-
+import { openDB, closeDB } from './helpers.js';
 
 // Test of the test rig (does not exercise module code)
 describe('Test that mongodb updates can be performed', async function() {
@@ -14,14 +7,13 @@ describe('Test that mongodb updates can be performed', async function() {
     let db;
     let collection;
     before('Set up mongo server', async function() {
-        client = await MongoClient.connect(dbURL, {});
-        expect(client).to.not.be.null;
-        db = client.db();
-        collection = db.collection('documents');
+        const results = await openDB();
+        client = results.client;
+        db = results.db;
+        collection = results.collection;
     });
     after('Close client', async function() {
-        db.close();
-        client.close();
+        await closeDB(client, db);
     });
 
     afterEach('Clear collection', async function() {

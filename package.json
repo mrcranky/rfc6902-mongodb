@@ -15,7 +15,9 @@
   "license": "ISC",
   "devDependencies": {
     "chai": "^4.3.7",
+    "lodash.clonedeep": "^4.5.0",
     "mocha": "^10.2.0",
-    "mongo-mock": "^4.2.0"
+    "mongo-mock": "^4.2.0",
+    "rfc6902": "^5.0.1"
   }
 }
