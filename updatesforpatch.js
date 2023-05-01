@@ -59,39 +59,43 @@ function pathRefersToEndOfArray(deconstructedPath) {
 
 function updatesForAddOperation(operation, currentDocument) {
     const deconstructedPath = deconstructPath(operation.path, currentDocument);
+    return updatesToAddValue(deconstructedPath, operation.value);
+}
+
+function updatesToAddValue(deconstructedPath, value) {
     if (pathRefersToArrayChild(deconstructedPath)) {
         if (pathRefersToEndOfArray(deconstructedPath)) {
-            return updatesForArrayAppend(operation, deconstructedPath, currentDocument);
+            return updatesForArrayAppend(deconstructedPath, value);
         } else {
-            return updatesForArrayInsert(operation, deconstructedPath, currentDocument);
+            return updatesForArrayInsert(deconstructedPath, value);
         }
     } else {
-        return updatesForFieldAdd(operation, deconstructedPath, currentDocument);
+        return updatesForFieldAdd(deconstructedPath, value);
     }
 }
 
-function updatesForFieldAdd(operation, deconstructedPath, currentDocument) {
+function updatesForFieldAdd(deconstructedPath, value) {
     const { value: previousValue, mongoPath } = deconstructedPath;
     if (previousValue !== undefined) { throw new Error('add refers to already existing field (use replace)'); }
 
     return [{
         $set: {
-            [mongoPath]: operation.value,
+            [mongoPath]: value,
         }
     }];
 }
 
-function updatesForArrayAppend(operation, deconstructedPath, currentDocument) {
+function updatesForArrayAppend(deconstructedPath, value) {
     const { parentMongoPath } = deconstructedPath;
 
     return [{
         $push: {
-            [parentMongoPath]: operation.value,
+            [parentMongoPath]: value,
         }
     }];
 }
 
-function updatesForArrayInsert(operation, deconstructedPath, currentDocument) {
+function updatesForArrayInsert(deconstructedPath, value) {
     const { parentMongoPath, fieldName, parentValue } = deconstructedPath;
     const index = parseInt(fieldName);
     if ((index < 0) || (index >= parentValue.length)) {
@@ -101,7 +105,7 @@ function updatesForArrayInsert(operation, deconstructedPath, currentDocument) {
     return [{
         $push: {
             [parentMongoPath]: {
-                $each: [operation.value],
+                $each: [value],
                 $position: index,
             },
         }
@@ -156,6 +160,18 @@ function updatesForReplaceOperation(operation, currentDocument) {
             [mongoPath]: operation.value,
         }
     }];
+}
+
+function updatesForCopyOperation(operation, currentDocument) {
+    const deconstructedToPath = deconstructPath(operation.path, currentDocument);
+    const deconstructedFromPath = deconstructPath(operation.from, currentDocument);
+    const { value: previousValue } = deconstructedFromPath;
+    const { mongoPath: toMongoPath } = deconstructedToPath;
+    if (previousValue === undefined) { throw new Error('copy refers to from path which does not exist'); }
+
+    // Copies are effectively 'add using the value at [from]', so we replicate the same behaviour as 'add'
+    // so that if for example the target is an array, the new value is inserted rather than replaced.
+    return updatesToAddValue(deconstructedToPath, previousValue);
 }
 
 /** @returns Array of MongoDB update statements that, if applied 

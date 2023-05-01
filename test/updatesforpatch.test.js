@@ -57,9 +57,24 @@ describe('Updates For Patch', async function() {
                 { "op": "replace", "path": "/baz/0", value: "mux" },
             ]); 
         });
-        it('should support copy operations');
-        it('should support copy operations from arrays');
-        it('should support copy operations to arrays');
+        it('should support copy operations', async function() {
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "copy", "from": "/baz", "path": "/maz" },
+            ]); 
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "copy", "from": "/foo", "path": "/boo" },
+            ]); 
+        });
+        it('should support copy operations from arrays', async function() {
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "copy", "from": "/baz/0", "path": "/maz" },
+            ]);
+        });
+        it('should support copy operations to arrays', async function() {
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "copy", "from": "/foo", "path": "/baz/0" },
+            ]);
+        });
         it('should support move operations');
         it('should support move operations from arrays');
         it('should support move operations to arrays');
