@@ -114,14 +114,18 @@ function updatesForArrayInsert(deconstructedPath, value) {
 
 function updatesForRemoveOperation(operation, currentDocument) {
     const deconstructedPath = deconstructPath(operation.path, currentDocument);
+    return updatesToRemoveValue(deconstructedPath);
+}
+
+function updatesToRemoveValue(deconstructedPath) {
     if (pathRefersToArrayChild(deconstructedPath)) {
-        return updatesForArrayRemove(operation, deconstructedPath, currentDocument);
+        return updatesToRemoveFromArray(deconstructedPath);
     } else {
-        return updatesForFieldRemove(operation, deconstructedPath, currentDocument);
+        return updatesToRemoveField(deconstructedPath);
     }
 }
 
-function updatesForFieldRemove(operation, deconstructedPath, currentDocument) {
+function updatesToRemoveField(deconstructedPath) {
     const { value: previousValue, mongoPath } = deconstructedPath;
     if (previousValue === undefined) { throw new Error('remove refers to non-existant field'); }
 
@@ -132,7 +136,7 @@ function updatesForFieldRemove(operation, deconstructedPath, currentDocument) {
     }];
 }
 
-function updatesForArrayRemove(operation, deconstructedPath, currentDocument) {
+function updatesToRemoveFromArray(deconstructedPath) {
     const { parentMongoPath, mongoPath, fieldName, parentValue } = deconstructedPath;
     const index = parseInt(fieldName);
     if ((index < 0) || (index >= parentValue.length)) {
@@ -166,12 +170,25 @@ function updatesForCopyOperation(operation, currentDocument) {
     const deconstructedToPath = deconstructPath(operation.path, currentDocument);
     const deconstructedFromPath = deconstructPath(operation.from, currentDocument);
     const { value: previousValue } = deconstructedFromPath;
-    const { mongoPath: toMongoPath } = deconstructedToPath;
     if (previousValue === undefined) { throw new Error('copy refers to from path which does not exist'); }
 
     // Copies are effectively 'add using the value at [from]', so we replicate the same behaviour as 'add'
     // so that if for example the target is an array, the new value is inserted rather than replaced.
     return updatesToAddValue(deconstructedToPath, previousValue);
+}
+
+function updatesForMoveOperation(operation, currentDocument) {
+    const deconstructedToPath = deconstructPath(operation.path, currentDocument);
+    const deconstructedFromPath = deconstructPath(operation.from, currentDocument);
+    const { value: previousValue } = deconstructedFromPath;
+    if (previousValue === undefined) { throw new Error('copy refers to from path which does not exist'); }
+
+    // Copies are effectively 'add using the value at [from]', so we replicate the same behaviour as 'add'
+    // so that if for example the target is an array, the new value is inserted rather than replaced.
+    return [
+        ...updatesToAddValue(deconstructedToPath, previousValue),
+        ...updatesToRemoveValue(deconstructedFromPath),
+    ];
 }
 
 /** @returns Array of MongoDB update statements that, if applied 
