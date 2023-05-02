@@ -53,4 +53,8 @@ operations, by changing the values referred to by operation paths. Unless it is
 unambiguously safe to coalesce operations together, this implementation will err 
 on the side of correctness: more distinct operations but that are guaranteed to 
 produce the correct final result.
+
+While JSON Patches can be applied to arrays as well as objects, MongoDB documents 
+can only be documents, so no update list will be produced if the original/target document
+is not an object.
  

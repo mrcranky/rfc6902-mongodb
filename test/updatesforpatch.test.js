@@ -145,6 +145,7 @@ describe('Updates For Patch', async function() {
             ])).to.be.rejectedWith('path which does not exist');
         });
 
+        it('should refuse to apply patches to arrays or non-object targets');
         it('should refuse to apply patches where paths contain characters MongoDB does not support');
         it('should refuse to apply patches where values contain characters MongoDB does not support');
         it('should refuse to perform add operations if the field did exist in the original document');
@@ -191,6 +192,9 @@ describe('Updates For Patch', async function() {
         const standardTests = JSON.parse(fs.readFileSync(path.join('test', 'standard-tests.json')));
         const blacklist = [];
         const filteredTests = standardTests.filter(test => {
+            if (Array.isArray(test.doc)) {
+                return false; // Skip tests where the document being patched is an array (which we don't support)
+            }
             for (const blacklistEntry of blacklist) {
                 if (test.comment.match(blacklistEntry)) {
                     return false;
