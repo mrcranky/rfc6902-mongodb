@@ -55,7 +55,30 @@ describe('Updates For Patch', async function() {
             ], exampleDocument)).to.throw('malformed patch');
         });
 
-        it('should refuse to apply patches where paths contain characters MongoDB does not support');
+        it('should refuse to apply patches where paths contain characters MongoDB does not support', async function() {
+            await expect(() => updatesForPatch([
+                { "op": "add", "path": "/$badkey", "value": "x" },
+            ], exampleDocument)).to.throw('not MongoDB-safe');
+            await expect(() => updatesForPatch([
+                { "op": "add", "path": "/sub/$badkey", "value": "x" },
+            ], exampleDocument)).to.throw('not MongoDB-safe');
+            await expect(() => updatesForPatch([
+                { "op": "add", "path": "/sub/.key", "value": "x" },
+            ], exampleDocument)).to.throw('not MongoDB-safe');
+            await expect(() => updatesForPatch([
+                { "op": "add", "path": "/sub/key.subkey", "value": "x" },
+            ], exampleDocument)).to.throw('not MongoDB-safe');
+            await expect(() => updatesForPatch([
+                { "op": "add", "path": "/sub/key\0subkey", "value": "x" },
+            ], exampleDocument)).to.throw('not MongoDB-safe');
+            await expect(() => updatesForPatch([
+                { "op": "add", "path": "/\0", "value": "x" },
+            ], exampleDocument)).to.throw('not MongoDB-safe');
+            await expect(() => updatesForPatch([
+                { "op": "add", "path": "/", "value": "x" },
+            ], exampleDocument)).to.throw('not MongoDB-safe');
+        });
+
         it('should refuse to apply patches where values contain characters MongoDB does not support', async function() {
             await expect(() => updatesForPatch([
                 { "op": "add", "path": "/badvalue", "value": { "$badkey1": "value" } },
@@ -326,11 +349,16 @@ describe('Updates For Patch', async function() {
         const standardTests = JSON.parse(fs.readFileSync(path.join('test', 'standard-tests.json')));
         const blacklist = [
             // Cases describing unsupported operations
+
+            // Not supported because they would replace the target document rather than update it
             /.*replace object document with array.*/,
             /.*replace whole document.*/,
             /.*replacing the root of the document.*/,
-            /.*Add. \/ target.*/, // Not supported because it would produce a document with empty keys
+
+            // Not supported because they would produce a document with empty keys
+            /.*Add. \/ target.*/,
             /.*Add. \/foo\/ deep target.*/,
+            /.*Empty-string element.*/
         ];
         const filteredTests = standardTests.filter(test => {
             if (Array.isArray(test.doc)) {
@@ -338,6 +366,12 @@ describe('Updates For Patch', async function() {
             }
             if (typeof(test.doc) !== 'object') {
                 return false; // Skip tests where the document being patched is not an object (which we don't support)
+            }
+            const operationPaths = test.patch?.map(operation => operation.path);
+            const unsupportedPaths = operationPaths.filter(path => (path?.endsWith('/')));
+            if (unsupportedPaths.length > 0) {
+                // Skip tests that are trying to set empty keys (which we don't support)
+                return false;
             }
             for (const blacklistEntry of blacklist) {
                 if (test.comment && test.comment.match(blacklistEntry)) {

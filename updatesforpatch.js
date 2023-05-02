@@ -41,6 +41,9 @@ function deconstructPath(patchPath, document) {
     const pathElements = patchPath.split('/'); 
     pathElements.shift(); // Remove the empty path element produced by the leading slash
     const fieldName = pathElements.pop();
+    if (!keyIsMongoSafe(fieldName)) {
+        throw new Error('path is not MongoDB-safe (invalid characters)');
+    }
     // Now pathElements will contain the path of the parent of the value being operated on
 
     const parentValue = getValue(document, pathElements);
