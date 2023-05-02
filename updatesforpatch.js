@@ -169,6 +169,10 @@ function updatesForReplaceOperation(operation, currentDocument) {
 function updatesForCopyOperation(operation, currentDocument) {
     const deconstructedToPath = deconstructPath(operation.path, currentDocument);
     const deconstructedFromPath = deconstructPath(operation.from, currentDocument);
+    if (deconstructedFromPath.mongoPath === deconstructedToPath.mongoPath) {
+        return []; // No-op, copy to self
+    }
+
     const { value: previousValue } = deconstructedFromPath;
     if (previousValue === undefined) { throw new Error('copy refers to from path which does not exist'); }
 
@@ -180,6 +184,10 @@ function updatesForCopyOperation(operation, currentDocument) {
 function updatesForMoveOperation(operation, currentDocument) {
     const deconstructedToPath = deconstructPath(operation.path, currentDocument);
     const deconstructedFromPath = deconstructPath(operation.from, currentDocument);
+    if (deconstructedFromPath.mongoPath === deconstructedToPath.mongoPath) {
+        return []; // No-op, move to self
+    }
+
     const { value: previousValue } = deconstructedFromPath;
     if (previousValue === undefined) { throw new Error('copy refers to from path which does not exist'); }
 
