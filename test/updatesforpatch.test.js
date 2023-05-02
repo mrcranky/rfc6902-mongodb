@@ -214,15 +214,12 @@ describe('Updates For Patch', async function() {
                     return false;
                 }
             }
-            if (test.error) {
-                return false; // Positive tests only
-            }
             return true;
         });
         for (const [index, standardTest] of Object.entries(filteredTests)) {
             const name = standardTest.comment || standardTest.error || `#${index} (${JSON.stringify(standardTest.patch)})`;
             it(`should pass standard test case: ${name}`, async function() {
-                await checkUpdatesProduceCorrectResult(this.test.title, standardTest.doc, standardTest.patch);
+                await checkUpdatesProduceCorrectResult(this.test.title, standardTest.doc, standardTest.patch, standardTest.error);
             });
         }
     });

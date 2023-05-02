@@ -43,29 +43,41 @@ export async function applyPatchUpdates(query, updates) {
     }
 }
 
-export async function checkUpdatesProduceCorrectResult(message, originalDocument, patch) {
+export async function checkUpdatesProduceCorrectResult(message, originalDocument, patch, expectedError) {
     const insertResult = await collection.insertOne({ ...originalDocument }); // Deliberately clone to avoid the parameter being modified by the insert
     expect(insertResult.acknowledged).to.be.true;
     const query = { _id: insertResult.insertedId };
 
-    const updates = updatesForPatch(patch, originalDocument);
-    expect(updates).to.be.a('array');
-    await applyPatchUpdates(query, updates);
-
-    const finalDocument = await collection.findOne(query);
-    delete finalDocument._id;
-
-    const referenceDocument = cloneDeep(originalDocument);
-    const patchResults = applyPatch(referenceDocument, patch);
-    const testErrors = patchResults.filter(result => {
-        return result?.name === 'TestError';
-    });
-    if (testErrors.length > 0) {
-        // Patch fails tests, so should not be applied.
-        // NB: despite the spec, rfc6902 will have modified referenceDocument even though one of the tests fail
-        expect(updates).to.have.length(0);
+    if (expectedError) {
+        expect(() => {
+            updatesForPatch(patch, originalDocument);
+        }).to.throw; // NB: We don't check what the error is, just that one is thrown
+        return originalDocument;
     } else {
-        expect(finalDocument, message).to.deep.equal(referenceDocument);
+        const referenceDocument = cloneDeep(originalDocument);
+        const patchResults = applyPatch(referenceDocument, patch);
+        const testErrors = patchResults.filter(result => {
+            return result?.name === 'TestError';
+        });
+        const patchShouldNotBeApplied = testErrors.length > 0;
+    
+        const updates = updatesForPatch(patch, originalDocument);
+        expect(updates).to.be.a('array');
+
+        await applyPatchUpdates(query, updates);
+
+        const finalDocument = await collection.findOne(query);
+        delete finalDocument._id;
+
+        if (patchShouldNotBeApplied) {
+            // Patch fails tests, so should not be applied.
+            expect(updates).to.have.length(0);
+            // NB: despite the spec, rfc6902's applyPatch will have modified referenceDocument,
+            // even though one of the tests fail.
+        } else {
+            expect(finalDocument, message).to.deep.equal(referenceDocument);
+        }
+        return finalDocument;
     }
-    return finalDocument;
+
 }
