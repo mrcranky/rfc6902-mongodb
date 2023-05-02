@@ -59,7 +59,16 @@ export async function checkUpdatesProduceCorrectResult(message, originalDocument
     delete finalDocument._id;
 
     const referenceDocument = cloneDeep(originalDocument);
-    applyPatch(referenceDocument, patch);
-    expect(finalDocument, message).to.deep.equal(referenceDocument);
+    const patchResults = applyPatch(referenceDocument, patch);
+    const testErrors = patchResults.filter(result => {
+        return result?.name === 'TestError';
+    });
+    if (testErrors.length > 0) {
+        // Patch fails tests, so should not be applied.
+        // NB: despite the spec, rfc6902 will have modified referenceDocument even though one of the tests fail
+        expect(updates).to.have.length(0);
+    } else {
+        expect(finalDocument, message).to.deep.equal(referenceDocument);
+    }
     return finalDocument;
 }

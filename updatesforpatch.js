@@ -191,6 +191,13 @@ function updatesForMoveOperation(operation, currentDocument) {
     ];
 }
 
+function passesTestOperation(operation, currentDocument) {
+    const deconstructedPath = deconstructPath(operation.path, currentDocument);
+    const { value } = deconstructedPath;
+
+    return value === operation.value;
+}
+
 /** @returns Array of MongoDB update statements that, if applied 
  * in order, will transform the original document in the manner
  * described by the patch document.

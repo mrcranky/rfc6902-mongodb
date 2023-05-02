@@ -154,7 +154,26 @@ describe('Updates For Patch', async function() {
     });
 
     describe('Test operations', function() {
-        it('should apply patches only if the original document matches conditions specified in test operations');
+        it('should respect test operation conditions that fail', async function() {
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "test", "path": "/foo", "value": "cheese" }, // should fail
+                { "op": "replace", "path": "/foo", "value": "baz" },
+            ]);
+        });
+
+        it('should respect test operation conditions that succeed', async function() {
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "test", "path": "/foo", "value": "bar" }, // should fail
+                { "op": "replace", "path": "/foo", "value": "baz" },
+            ]);
+        });
+
+        it('should respect test operation conditions on non-existent fields', async function() {
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "test", "path": "/bar", "value": "cheese" }, // should fail
+                { "op": "replace", "path": "/foo", "value": "baz" },
+            ]);
+        });
     });
 
     describe('Efficiency tests', function() {
