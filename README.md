@@ -65,5 +65,11 @@ is not allowed and will cause an Error to be thrown.
 * Patches may also describe replacing the entire document with a new document by 
 specifying the empty path. However in MongoDB, this would require a `replaceOne` 
 operation, and the expectation is that the returned array describes parameters for 
-calls to `updateOne`. For API simplicity, the module will throw an error rather than
+calls to `updateOne`. For API simplicity, the module will throw an Error rather than
 try to handle this case.
+* Patch operations that would result in empty keys (trailing slashes on the path) are
+supported in JSON, but not well supported in MongoDB; the module will throw an Error
+if asked to generate updates for such patches.
+* Patch operations that contain problematic MongoDB characters in the document path 
+or sub-documents being inserted (e.g. leading `$`, `.` and `\0` characters) will throw
+an Error.

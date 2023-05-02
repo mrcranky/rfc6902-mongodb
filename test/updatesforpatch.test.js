@@ -189,12 +189,15 @@ describe('Updates For Patch', async function() {
     describe('Standard JSON patch tests', function() {
         // Loop through all the test patches in the standard set.
         // Aside from a few unsupported operations we skip, all should pass.
+        // Tests are taken from https://github.com/json-patch/json-patch-tests/blob/master/tests.json
         const standardTests = JSON.parse(fs.readFileSync(path.join('test', 'standard-tests.json')));
         const blacklist = [
             // Cases describing unsupported operations
             /.*replace object document with array.*/,
             /.*replace whole document.*/,
-            /.*replacing the root of the document.*/
+            /.*replacing the root of the document.*/,
+            /.*Add. \/ target.*/, // Not supported because it would produce a document with empty keys
+            /.*Add. \/foo\/ deep target.*/,
         ];
         const filteredTests = standardTests.filter(test => {
             if (Array.isArray(test.doc)) {
