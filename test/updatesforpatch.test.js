@@ -56,7 +56,32 @@ describe('Updates For Patch', async function() {
         });
 
         it('should refuse to apply patches where paths contain characters MongoDB does not support');
-        it('should refuse to apply patches where values contain characters MongoDB does not support');
+        it('should refuse to apply patches where values contain characters MongoDB does not support', async function() {
+            await expect(() => updatesForPatch([
+                { "op": "add", "path": "/badvalue", "value": { "$badkey1": "value" } },
+            ], exampleDocument)).to.throw('not MongoDB-safe');
+            await expect(() => updatesForPatch([
+                { "op": "add", "path": "/badvalue", "value": { "nested": { "$badkey1": "value" } } },
+            ], exampleDocument)).to.throw('not MongoDB-safe');
+            await expect(() => updatesForPatch([
+                { "op": "add", "path": "/badvalue", "value": { "nested": { "": "value" } } },
+            ], exampleDocument)).to.throw('not MongoDB-safe');
+            await expect(() => updatesForPatch([
+                { "op": "add", "path": "/badvalue", "value": { "nested.key": "value" } },
+            ], exampleDocument)).to.throw('not MongoDB-safe');
+            await expect(() => updatesForPatch([
+                { "op": "add", "path": "/badvalue", "value": { ".key": "value" } },
+            ], exampleDocument)).to.throw('not MongoDB-safe');
+            await expect(() => updatesForPatch([
+                { "op": "add", "path": "/badvalue", "value": { "key.": "value" } },
+            ], exampleDocument)).to.throw('not MongoDB-safe');
+            await expect(() => updatesForPatch([
+                { "op": "add", "path": "/badvalue", "value": { ".": "value" } },
+            ], exampleDocument)).to.throw('not MongoDB-safe');
+            await expect(() => updatesForPatch([
+                { "op": "add", "path": "/badvalue", "value": { "foo$bar": "value" } },
+            ], exampleDocument)).to.not.throw('not MongoDB-safe');
+        });
     });
 
     describe('Add operations', function() {

@@ -3,6 +3,24 @@ import cloneDeep from 'lodash.clonedeep';
 import isEqual from 'lodash.isequal';
 import { v4 as uuid } from 'uuid';
 
+function keyIsMongoSafe(key) {
+    if (key.startsWith('$')) { return false; }
+    if (key.includes('\0')) { return false; }
+    if (key.includes('.')) { return false; }
+    if (key === '') { return false; }
+    return true;
+}
+
+function documentIsMongoSafe(document) {
+    if (typeof(document) === 'object') {
+        for (const key in document) {
+            if (!keyIsMongoSafe(key)) { return false; }
+            if (!documentIsMongoSafe(document[key])) { return false; } // Recurse to child values
+        }
+    }
+    return true;
+}
+
 function getValue(document, pathElements) {
     if (pathElements.length === 0) { return document; }
     const remainingPathElements = [...pathElements]; //Deliberately clone so the caller isn't affected
@@ -64,6 +82,10 @@ function updatesForAddOperation(operation, currentDocument) {
 }
 
 function updatesToAddValue(deconstructedPath, value) {
+    if (!documentIsMongoSafe(value)) {
+        throw new Error('Value being set is not MongoDB-safe (invalid characters)');
+    }
+
     if (pathRefersToArrayChild(deconstructedPath)) {
         if (pathRefersToEndOfArray(deconstructedPath)) {
             return updatesForArrayAppend(deconstructedPath, value);
@@ -166,6 +188,10 @@ function updatesForReplaceOperation(operation, currentDocument) {
     const { value: previousValue, mongoPath } = deconstructedPath;
     if (previousValue === undefined) { throw new Error('replace refers to path which does not exist (use add)'); }
 
+    if (!documentIsMongoSafe(operation.value)) {
+        throw new Error('Value being set is not MongoDB-safe (invalid characters)');
+    }
+
     return [{
         $set: {
             [mongoPath]: operation.value,
@@ -183,6 +209,10 @@ function updatesForCopyOperation(operation, currentDocument) {
     const { value: previousValue } = deconstructedFromPath;
     if (previousValue === undefined) { throw new Error('copy refers to from path which does not exist'); }
 
+    if (!documentIsMongoSafe(previousValue)) {
+        throw new Error('Value being copied is not MongoDB-safe (invalid characters)');
+    }
+
     // Copies are effectively 'add using the value at [from]', so we replicate the same behaviour as 'add'
     // so that if for example the target is an array, the new value is inserted rather than replaced.
     return updatesToAddValue(deconstructedToPath, previousValue);
@@ -197,6 +227,9 @@ function updatesForMoveOperation(operation, currentDocument) {
 
     const { value: previousValue } = deconstructedFromPath;
     if (previousValue === undefined) { throw new Error('copy refers to from path which does not exist'); }
+    if (!documentIsMongoSafe(previousValue)) {
+        throw new Error('Value being moved is not MongoDB-safe (invalid characters)');
+    }
 
     // Copies are effectively 'add using the value at [from]', so we replicate the same behaviour as 'add'
     // so that if for example the target is an array, the new value is inserted rather than replaced.
