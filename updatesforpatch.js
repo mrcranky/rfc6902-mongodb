@@ -1,5 +1,6 @@
 import { applyPatch } from 'rfc6902';
 import cloneDeep from 'lodash.clonedeep';
+import isEqual from 'lodash.isequal';
 import { v4 as uuid } from 'uuid';
 
 function getValue(document, pathElements) {
@@ -191,10 +192,15 @@ function updatesForMoveOperation(operation, currentDocument) {
 }
 
 function passesTestOperation(operation, currentDocument) {
-    const deconstructedPath = deconstructPath(operation.path, currentDocument);
-    const { value } = deconstructedPath;
+    if (operation.path) {
+        const deconstructedPath = deconstructPath(operation.path, currentDocument);
+        const { value } = deconstructedPath;
 
-    return value === operation.value;
+        return isEqual(value, operation.value);
+    } else {
+        // testing the whole document
+        return isEqual(operation.value, currentDocument);
+    }
 }
 
 /** @returns Array of MongoDB update statements that, if applied 
