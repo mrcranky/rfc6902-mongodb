@@ -37,6 +37,9 @@ describe('Updates For Patch', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
                 { "op": "add", "path": "/baz/-", "value": "mux" },
             ]); 
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { "op": "add", "path": "/baz/2", "value": "mux" },
+            ]); 
         });
         it('should support insert mid-array operations', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
@@ -118,18 +121,18 @@ describe('Updates For Patch', async function() {
         it('should refuse to add to an index outside of the bounds of the array', async function() {
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
                 { "op": "add", "path": "/baz/-1", "value": "mux" },
-            ])).to.be.rejectedWith('non-existent index');
+            ])).to.be.rejectedWith('Out of bounds (lower)');
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "add", "path": "/baz/2", "value": "mux" },
-            ])).to.be.rejectedWith('non-existent index');
+                { "op": "add", "path": "/baz/3", "value": "mux" },
+            ])).to.be.rejectedWith('Out of bounds (upper)');
         });
         it('should refuse to remove an index outside of the bounds of the array', async function() {
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
                 { "op": "remove", "path": "/baz/-1", "value": "mux" },
-            ])).to.be.rejectedWith('non-existent index');
+            ])).to.be.rejectedWith('Out of bounds (lower)');
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
                 { "op": "remove", "path": "/baz/2", "value": "mux" },
-            ])).to.be.rejectedWith('non-existent index');
+            ])).to.be.rejectedWith('Out of bounds (upper)');
         });
         it('should refuse to replace an index outside of the bounds of the array', async function() {
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
@@ -217,7 +220,7 @@ describe('Updates For Patch', async function() {
             return true;
         });
         for (const [index, standardTest] of Object.entries(filteredTests)) {
-            const name = standardTest.comment || standardTest.error || index;
+            const name = standardTest.comment || standardTest.error || `#${index} (${JSON.stringify(standardTest.patch)})`;
             it(`should pass standard test case: ${name}`, async function() {
                 await checkUpdatesProduceCorrectResult(this.test.title, standardTest.doc, standardTest.patch);
             });

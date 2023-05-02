@@ -95,12 +95,21 @@ function updatesForArrayAppend(deconstructedPath, value) {
     }];
 }
 
+function checkArrayIndex(parentValue, index, allowOneBeyond) {
+    if (index < 0) { 
+        throw new Error('Out of bounds (lower)');
+    }
+    //NB: For adds, we're allowed to target one beyond the end of the array (an append), but not two beyond
+    const limit = parentValue.length + (allowOneBeyond ? 1 : 0);
+    if (index >= limit) { 
+        throw new Error('Out of bounds (upper)');
+    }
+}
+
 function updatesForArrayInsert(deconstructedPath, value) {
     const { parentMongoPath, fieldName, parentValue } = deconstructedPath;
     const index = parseInt(fieldName);
-    if ((index < 0) || (index >= parentValue.length)) {
-        throw new Error('path refers to non-existent index');
-    }
+    checkArrayIndex(parentValue, index, true); // Allow targeting one beyond the end
 
     return [{
         $push: {
@@ -139,9 +148,7 @@ function updatesToRemoveField(deconstructedPath) {
 function updatesToRemoveFromArray(deconstructedPath) {
     const { parentMongoPath, mongoPath, fieldName, parentValue } = deconstructedPath;
     const index = parseInt(fieldName);
-    if ((index < 0) || (index >= parentValue.length)) {
-        throw new Error('path refers to non-existent index');
-    }
+    checkArrayIndex(parentValue, index, false); // Strictly limit to targeting items within bounds
 
     // MongoDB does not currently support an easy removal of an item from within an 
     // array by index, only by value.
