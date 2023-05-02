@@ -136,7 +136,7 @@ function updatesToRemoveValue(deconstructedPath) {
 
 function updatesToRemoveField(deconstructedPath) {
     const { value: previousValue, mongoPath } = deconstructedPath;
-    if (previousValue === undefined) { throw new Error('remove refers to non-existant field'); }
+    if (previousValue === undefined) { throw new Error('path does not exist'); }
 
     return [{
         $unset: {
@@ -201,8 +201,8 @@ function updatesForMoveOperation(operation, currentDocument) {
     // Copies are effectively 'add using the value at [from]', so we replicate the same behaviour as 'add'
     // so that if for example the target is an array, the new value is inserted rather than replaced.
     return [
-        ...updatesToAddValue(deconstructedToPath, previousValue),
         ...updatesToRemoveValue(deconstructedFromPath),
+        ...updatesToAddValue(deconstructedToPath, previousValue),
     ];
 }
 
@@ -237,7 +237,8 @@ export default function updatesForPatch(patch, originalDocument) {
     const updates = [];
     const currentDocument = cloneDeep(originalDocument);
     for (const operation of patch) {
-        if (typeof(operation) !== 'object') { throw new Error('malformed patch operation') }
+        if (typeof(operation) !== 'object') { throw new Error('malformed patch operation (not an object)') }
+        if (operation.path === undefined) { throw new Error ('malformed patch operation (no path)'); }
 
         if (operation.op === 'add') {
             updates.push(...updatesForAddOperation(operation, currentDocument));
@@ -254,7 +255,7 @@ export default function updatesForPatch(patch, originalDocument) {
                 return []; // Failed test, whole patch should not be applied
             }
         } else {
-            throw new Error('malformed patch operation (unknown or missing op field');
+            throw new Error('malformed patch operation (unknown or missing op field)');
         }
 
         applyPatch(currentDocument, [operation]); // Apply just this operation to the document to track its current state
