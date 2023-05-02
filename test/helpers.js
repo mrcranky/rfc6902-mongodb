@@ -9,9 +9,6 @@ import cloneDeep from 'lodash.clonedeep';
 
 const { MongoClient } = mongodb;
 
-// Connection URL
-const dbURL = 'mongodb://localhost:27017/test';
-
 let mongod;
 let client, db, collection;
 export async function openDB() {
