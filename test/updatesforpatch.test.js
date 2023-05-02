@@ -84,6 +84,9 @@ describe('Updates For Patch', async function() {
                 { "op": "add", "path": "/badvalue", "value": { "$badkey1": "value" } },
             ], exampleDocument)).to.throw('not MongoDB-safe');
             await expect(() => updatesForPatch([
+                { "op": "add", "path": "/badvalue", "value": [{ "$badkey1": "value" }] },
+            ], exampleDocument)).to.throw('not MongoDB-safe');
+            await expect(() => updatesForPatch([
                 { "op": "add", "path": "/badvalue", "value": { "nested": { "$badkey1": "value" } } },
             ], exampleDocument)).to.throw('not MongoDB-safe');
             await expect(() => updatesForPatch([
