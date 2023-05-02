@@ -339,10 +339,43 @@ describe('Updates For Patch', async function() {
     });
 
     describe('Efficiency tests', function() {
-        it('should be able to coalesce multiple update operations on the same field into a single update');
-        it('should be able to coalesce multiple update operations on unrelated fields into a single operation');
-        it('should be able to discard operations rendered redundant by a subsequent remove operation');
-        it('should refuse to coalesce operations that would cause conflicts within a single MongoDB update');
+        const checkCoalescing = async (title, patch, originalDocument, expectedError, limitOnUpdateCount) => {
+            await checkUpdatesProduceCorrectResult(title, originalDocument, patch, expectedError, limitOnUpdateCount);
+        }
+
+		it('should minimise updates that add/replace fields', async function() {
+            await checkCoalescing(this.test.title, [
+                { op: 'add', path: '/a', value: { b: 'foo' } },
+                { op: 'replace', path: '/a/b', value: 'bar' },
+                { op: 'replace', path: '/a/b', value: 'baz' },
+                { op: 'add', path: '/c', value: { b: 'qux' } },
+            ], {}, false, 1);
+        });
+
+		it('should minimise updates when adding / removing nested structure', async function() {
+            await checkCoalescing(this.test.title, [
+                { op: 'add', path: '/a', value: {} },
+                { op: 'add', path: '/a/b', value: {} },
+                { op: 'add', path: '/a/b/c', value: 'foo' },
+                { op: 'replace', path: '/a/b/c', value: 'bar' },
+                { op: 'replace', path: '/a', value: { x: 'baz' } },
+            ], {}, false, 1);
+        });
+
+		it('should minimise updates when later operations override previous operations', async function() {
+            await checkCoalescing(this.test.title, [
+                { op: 'add', path: '/a/b', value: { b: 'foo' } }, // Replace just one field
+                { op: 'replace', path: '/a', value: { c: 'bar' } }, // Replace the entire object
+            ], { a: {} }, false, 1);
+        });
+
+		it('should minimise updates when later operations partly modify previous operations', async function() {
+            await checkCoalescing(this.test.title, [
+                { op: 'add', path: '/a', value: { b: 'foo' } }, // Set an entire object
+                { op: 'replace', path: '/a/b', value: 'bar' }, // Replace just one field of that object
+                { op: 'add', path: '/a/c', value: 'baz' }, // Replace add a different field to that object
+            ], { a: {} }, false, 1);
+        });
     });
 
     describe('Standard JSON patch tests', function() {

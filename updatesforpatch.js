@@ -1,5 +1,6 @@
 import { applyPatch } from 'rfc6902';
 import cloneDeep from 'lodash.clonedeep';
+import lodashSet from 'lodash.set';
 import isEqual from 'lodash.isequal';
 import { v4 as uuid } from 'uuid';
 
@@ -254,6 +255,80 @@ function passesTestOperation(operation, currentDocument) {
     }
 }
 
+function findRelatedUpdates(path, updateDocument) {
+    for (const key in updateDocument) {
+        if (path.startsWith(`${key}.`)) {
+            return { parentKey: key }; // a key exists which is a parent of the path we care about 
+        }
+        if (key.startsWith(`${path}.`)) {
+            return { childKey: key }; // a key exists which is a child of the path we care about 
+        }
+    }
+    return {};
+}
+
+function combineUpdates(a, b) {
+    if (!a) { return [b]; } // When there is no previous update to combine with
+
+    if (a.$set && b.$set) {
+        const update = cloneDeep(a);
+        for (const keyB in b.$set) {
+            const valueB = b.$set[keyB];
+            const { childKey, parentKey } = findRelatedUpdates(keyB, update.$set);
+            if (parentKey) {
+                // The previous write to the parent value is now getting an update to one of its sub-values
+                const write = update.$set[parentKey];
+                const subPath = keyB.slice(parentKey.length + 1); // Ignore the part of the path the updates share
+                // Alter the value being written in a, to add (or replace) the value being written in b
+                lodashSet(write, subPath, valueB);
+            } else if (childKey) {
+                // The old write to the child is no longer relevant, it has been superceded by the write to the parent
+                delete update.$set[childKey]; 
+                update.$set[keyB] = valueB;
+            } else {
+                // The write doesn't partially overlap with any other pre-existing writes, so can just be added
+                // If the key has already been written in a previous update, this will replace the previous write
+                // entirely
+                update.$set[keyB] = valueB;
+            }
+        }
+        return [update];
+    }
+
+    // Default case is to simply return both updates without combining them
+    return [a, b];
+}
+
+// NB: We only compact contiguous updates/operations. For patches which are 
+// dominated by add/replace operations, this gets rid of the worst inefficiency: 
+// multiple $sets which could be all done in one DB update.
+// Remove operations are slightly easier to analyse for safety, because you can tell
+// if a remove is operating on a sub-document of a path in a previous operation.
+// Array replace or insert updates have knock-on effects (because they change the 
+// values pointed to by subsequent indexes) which are much harder to deem "safe",
+// but array append operations, or array inserts which are contiguous, result in 
+// $push operations which can be safely combined.
+// A more aggressive algorithm here could identify intervening updates which are 
+// unrelated, and choose to combine an update with an earlier operation as long 
+// as none of the intervening updates affect the same area of the document. E.g.:
+// * Add /b as { c: { d: 0 } }
+// * Remove /a
+// * Add /b/c/e as 1
+// The third operation could be safely folded into the first operation, because the
+// second operation affects the /a subdocument, and the others affect /b 
+// However this comes with the downside that the order of operations in the patch
+// no longer matches the order of changes to the document, which may catch users 
+// out if they are making assumptions about the document's state mid-update.
+function compactUpdates(updates) {
+    const compacted = [];
+    for (const update of updates) {
+        const previousUpdate = compacted.pop();
+        const compactedUpdates = combineUpdates(previousUpdate, update);
+        compacted.push(...compactedUpdates);
+    }
+    return compacted;
+}
+
 /** @returns Array of MongoDB update statements that, if applied 
  * in order, will transform the original document in the manner
  * described by the patch document.
@@ -296,5 +371,6 @@ export default function updatesForPatch(patch, originalDocument) {
 
         applyPatch(currentDocument, [operation]); // Apply just this operation to the document to track its current state
     }
-    return updates;
+    
+    return compactUpdates(updates);
 }

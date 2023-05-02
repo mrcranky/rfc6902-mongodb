@@ -43,7 +43,7 @@ export async function applyPatchUpdates(query, updates) {
     }
 }
 
-export async function checkUpdatesProduceCorrectResult(message, originalDocument, patch, expectedError) {
+export async function checkUpdatesProduceCorrectResult(message, originalDocument, patch, expectedError, limitOnUpdateCount) {
     const insertResult = await collection.insertOne({ ...originalDocument }); // Deliberately clone to avoid the parameter being modified by the insert
     expect(insertResult.acknowledged).to.be.true;
     const query = { _id: insertResult.insertedId };
@@ -63,6 +63,9 @@ export async function checkUpdatesProduceCorrectResult(message, originalDocument
     
         const updates = updatesForPatch(patch, originalDocument);
         expect(updates).to.be.a('array');
+        if (limitOnUpdateCount) {
+            expect(updates, 'updates have not been combined').to.have.length.lessThanOrEqual(limitOnUpdateCount);
+        }
 
         await applyPatchUpdates(query, updates);
 

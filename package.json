@@ -28,6 +28,7 @@
   "dependencies": {
     "lodash.clonedeep": "^4.5.0",
     "lodash.isequal": "^4.5.0",
+    "lodash.set": "^4.3.2",
     "rfc6902": "^5.0.1",
     "uuid": "^9.0.0"
   }
