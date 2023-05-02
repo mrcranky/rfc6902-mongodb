@@ -75,8 +75,7 @@ function updatesToAddValue(deconstructedPath, value) {
 }
 
 function updatesForFieldAdd(deconstructedPath, value) {
-    const { value: previousValue, mongoPath } = deconstructedPath;
-    if (previousValue !== undefined) { throw new Error('add refers to already existing field (use replace)'); }
+    const { mongoPath } = deconstructedPath;
 
     return [{
         $set: {
