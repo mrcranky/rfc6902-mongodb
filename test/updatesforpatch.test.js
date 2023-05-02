@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { openDB, closeDB, clearCollection, checkUpdatesProduceCorrectResult } from './helpers.js';
@@ -186,6 +188,25 @@ describe('Updates For Patch', async function() {
     describe('Standard JSON patch tests', function() {
         // Loop through all the test patches in the standard set.
         // Aside from a few unsupported operations we skip, all should pass.
+        const standardTests = JSON.parse(fs.readFileSync(path.join('test', 'standard-tests.json')));
+        const blacklist = [];
+        const filteredTests = standardTests.filter(test => {
+            for (const blacklistEntry of blacklist) {
+                if (test.comment.match(blacklistEntry)) {
+                    return false;
+                }
+            }
+            if (test.error) {
+                return false; // Positive tests only
+            }
+            return true;
+        });
+        for (const [index, standardTest] of Object.entries(filteredTests)) {
+            const name = standardTest.comment || standardTest.error || index;
+            it(`should pass standard test case: ${name}`, async function() {
+                await checkUpdatesProduceCorrectResult(this.test.title, standardTest.doc, standardTest.patch);
+            });
+        }
     });
 });
 
