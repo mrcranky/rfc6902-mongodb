@@ -15,7 +15,7 @@ describe('Updates For Patch', async function() {
         baz: ['bux', 'tux'],
     };
 
-    describe('Basic operations', async function() {
+    describe('Basic operations', function() {
         it('should support add value operations', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
                 { "op": "add", "path": "/bar", "value": "mux" },
@@ -96,7 +96,7 @@ describe('Updates For Patch', async function() {
         });
     });
 
-    describe('Validity checking', async function() {
+    describe('Validity checking', function() {
         it('should not modify the original document passed in', async function() {
             const documentPrior = cloneDeep(exampleDocument);
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
@@ -153,18 +153,18 @@ describe('Updates For Patch', async function() {
         it('should refuse to perform remove mid-array operations if the field specified is not an array or an object');
     });
 
-    describe('Test operations', async function() {
+    describe('Test operations', function() {
         it('should apply patches only if the original document matches conditions specified in test operations');
     });
 
-    describe('Efficiency tests', async function() {
+    describe('Efficiency tests', function() {
         it('should be able to coalesce multiple update operations on the same field into a single update');
         it('should be able to coalesce multiple update operations on unrelated fields into a single operation');
         it('should be able to discard operations rendered redundant by a subsequent remove operation');
         it('should refuse to coalesce operations that would cause conflicts within a single MongoDB update');
     });
 
-    describe('Standard JSON patch tests', async function() {
+    describe('Standard JSON patch tests', function() {
         // Loop through all the test patches in the standard set.
         // Aside from a few unsupported operations we skip, all should pass.
     });
