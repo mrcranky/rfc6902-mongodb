@@ -190,13 +190,21 @@ describe('Updates For Patch', async function() {
         // Loop through all the test patches in the standard set.
         // Aside from a few unsupported operations we skip, all should pass.
         const standardTests = JSON.parse(fs.readFileSync(path.join('test', 'standard-tests.json')));
-        const blacklist = [];
+        const blacklist = [
+            // Cases describing unsupported operations
+            /.*replace object document with array.*/,
+            /.*replace whole document.*/,
+            /.*replacing the root of the document.*/
+        ];
         const filteredTests = standardTests.filter(test => {
             if (Array.isArray(test.doc)) {
                 return false; // Skip tests where the document being patched is an array (which we don't support)
             }
+            if (typeof(test.doc) !== 'object') {
+                return false; // Skip tests where the document being patched is not an object (which we don't support)
+            }
             for (const blacklistEntry of blacklist) {
-                if (test.comment.match(blacklistEntry)) {
+                if (test.comment && test.comment.match(blacklistEntry)) {
                     return false;
                 }
             }

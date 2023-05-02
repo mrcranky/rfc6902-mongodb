@@ -54,7 +54,16 @@ unambiguously safe to coalesce operations together, this implementation will err
 on the side of correctness: more distinct operations but that are guaranteed to 
 produce the correct final result.
 
-While JSON Patches can be applied to arrays as well as objects, MongoDB documents 
-can only be documents, so no update list will be produced if the original/target document
-is not an object.
- 
+### Unsupported patch operations
+
+* While JSON Patches can be applied to arrays as well as objects, MongoDB documents 
+can only be documents. If the original/target document is not an object, the module
+will refuse to create an update list (throwing an Error object).
+* Similarly, by specifying the empty path, JSON patches can describe replacing the 
+document with a value or an array (as these are still valid JSON documents). This
+is not allowed and will cause an Error to be thrown.
+* Patches may also describe replacing the entire document with a new document by 
+specifying the empty path. However in MongoDB, this would require a `replaceOne` 
+operation, and the expectation is that the returned array describes parameters for 
+calls to `updateOne`. For API simplicity, the module will throw an error rather than
+try to handle this case.
