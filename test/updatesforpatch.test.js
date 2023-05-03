@@ -376,6 +376,54 @@ describe('Updates For Patch', async function() {
                 { op: 'add', path: '/a/c', value: 'baz' }, // Replace add a different field to that object
             ], { a: {} }, false, 1);
         });
+
+		it('should minimise updates when doing array appends', async function() {
+            await checkCoalescing(this.test.title, [
+                { op: 'add', path: '/a/-', value: 3 },
+                { op: 'add', path: '/a/-', value: 4 },
+                { op: 'add', path: '/a/-', value: 5 },
+            ], { a: [0, 1, 2] }, false, 1);
+        });
+
+		it('should minimise updates when doing array appends to different keys', async function() {
+            await checkCoalescing(this.test.title, [
+                { op: 'add', path: '/a/-', value: 3 },
+                { op: 'add', path: '/a/-', value: 4 },
+                { op: 'add', path: '/b/-', value: 1 },
+            ], { a: [0, 1, 2], b: [] }, false, 1);
+        });
+
+		it('should minimise updates when doing contiguous array inserts in reverse order', async function() {
+            await checkCoalescing(this.test.title, [
+                { op: 'add', path: '/a/0', value: 2 }, // 1 (reverse order)
+                { op: 'add', path: '/a/0', value: 1 },
+                { op: 'add', path: '/a/0', value: 0 },
+            ], { a: [3, 4] }, false, 1);
+        });
+
+		it('should minimise updates when doing contiguous array inserts in forward order', async function() {
+            await checkCoalescing(this.test.title, [
+                { op: 'add', path: '/b/0', value: 10 }, // forward order, but different key so can be merged
+                { op: 'add', path: '/b/1', value: 11 },
+                { op: 'add', path: '/b/2', value: 12 },
+            ], { b: [] }, false, 1);
+        });
+
+		it('should minimise updates when doing contiguous array inserts out of order', async function() {
+            await checkCoalescing(this.test.title, [
+                { op: 'add', path: '/a/1', value: 3 }, // 1
+                { op: 'add', path: '/a/1', value: 1 },
+                { op: 'add', path: '/a/2', value: 2 }, // Deliberately in between the values added by the previous two updates
+            ], { a: [0, 4] }, false, 1);
+        });
+
+		it('should minimise updates when doing non-contiguous array inserts', async function() {
+            await checkCoalescing(this.test.title, [
+                { op: 'add', path: '/a/2', value: 4 },
+                { op: 'add', path: '/a/0', value: 0 }, // Non-contiguous with first so forces a 2nd update
+                { op: 'add', path: '/a/1', value: 1 },
+            ], { a: [2, 3] }, false, 2);
+        });
     });
 
     describe('Standard JSON patch tests', function() {

@@ -267,32 +267,111 @@ function findRelatedUpdates(path, updateDocument) {
     return {};
 }
 
+function combineSetUpdates(a, b) {
+    const update = cloneDeep(a);
+    for (const keyB in b.$set) {
+        const valueB = b.$set[keyB];
+        const { childKey, parentKey } = findRelatedUpdates(keyB, update.$set);
+        if (parentKey) {
+            // The previous write to the parent value is now getting an update to one of its sub-values
+            const write = update.$set[parentKey];
+            const subPath = keyB.slice(parentKey.length + 1); // Ignore the part of the path the updates share
+            // Alter the value being written in a, to add (or replace) the value being written in b
+            lodashSet(write, subPath, valueB);
+        } else if (childKey) {
+            // The old write to the child is no longer relevant, it has been superceded by the write to the parent
+            delete update.$set[childKey]; 
+            update.$set[keyB] = valueB;
+        } else {
+            // The write doesn't partially overlap with any other pre-existing writes, so can just be added
+            // If the key has already been written in a previous update, this will replace the previous write
+            // entirely
+            update.$set[keyB] = valueB;
+        }
+    }
+    return [update];
+}
+
+function isAppend(pushUpdate) {
+    if (typeof(pushUpdate) === 'object') {
+        if (pushUpdate.$position !==  undefined) {
+            return { append: false, items: pushUpdate.$each };
+        } else {
+            return { append: true, items: pushUpdate.$each };
+        }
+    } else {
+        return { append: true, items: [pushUpdate] };
+    }
+}
+
+function combineArrayUpdates(a, b) {
+    const update = cloneDeep(a);
+    for (const keyB in b.$push) {
+        const writeB = b.$push[keyB];
+        const writeA = update.$push[keyB];
+        if (writeA && writeB) {
+            // Writing to an array we've already written to, still might be able to combine,
+            // if the new write is contiguous with the old
+            const appendA = isAppend(writeA);
+            const appendB = isAppend(writeB);
+            if (appendA.append && appendB.append) {
+                // Appends are naturally contiguous
+                update.$push[keyB] = {
+                    $each: [
+                        ...appendA.items,
+                        ...appendB.items,
+                    ]
+                };
+            } else {
+                // Inserts might still be contiguous
+                const startIndex = writeA.$position;
+                const endIndex = startIndex + writeA.$each.length;
+                if (writeB.$position === endIndex) {
+                    // B is being inserted at the index just after the items added by A
+                    update.$push[keyB] = {
+                        $each: [
+                            ...appendA.items,
+                            ...appendB.items,
+                        ],
+                        $position: startIndex,
+                    }
+                } else if (writeB.$position === startIndex) {
+                    // B is being inserted at the same index as A (i.e. just before all the items added by A)
+                    update.$push[keyB] = {
+                        $each: [
+                            ...appendB.items,
+                            ...appendA.items,
+                        ],
+                        $position: startIndex,
+                    }
+                } else if ((writeB.$position > startIndex) && (writeB.$position < endIndex)) {
+                    const items = [...appendA.items];
+                    const relativePosition = writeB.$position - startIndex;
+                    items.splice(relativePosition, 0, ...appendB.items); // insert B's items at the appropriate position within A's items
+                    update.$push[keyB] = {
+                        $position: startIndex,
+                        $each: items,
+                    }
+                } else {
+                    return [a, b]; // Can't combine
+                }
+            }
+        } else {
+            // Writing to unrelated arrays, just do both
+            update.$push[keyB] = writeB;
+        }
+    }
+    return [update];
+}
+
 function combineUpdates(a, b) {
     if (!a) { return [b]; } // When there is no previous update to combine with
 
     if (a.$set && b.$set) {
-        const update = cloneDeep(a);
-        for (const keyB in b.$set) {
-            const valueB = b.$set[keyB];
-            const { childKey, parentKey } = findRelatedUpdates(keyB, update.$set);
-            if (parentKey) {
-                // The previous write to the parent value is now getting an update to one of its sub-values
-                const write = update.$set[parentKey];
-                const subPath = keyB.slice(parentKey.length + 1); // Ignore the part of the path the updates share
-                // Alter the value being written in a, to add (or replace) the value being written in b
-                lodashSet(write, subPath, valueB);
-            } else if (childKey) {
-                // The old write to the child is no longer relevant, it has been superceded by the write to the parent
-                delete update.$set[childKey]; 
-                update.$set[keyB] = valueB;
-            } else {
-                // The write doesn't partially overlap with any other pre-existing writes, so can just be added
-                // If the key has already been written in a previous update, this will replace the previous write
-                // entirely
-                update.$set[keyB] = valueB;
-            }
-        }
-        return [update];
+        return combineSetUpdates(a, b);
+    }
+    if (a.$push && b.$push) {
+        return combineArrayUpdates(a, b);
     }
 
     // Default case is to simply return both updates without combining them
