@@ -424,6 +424,26 @@ describe('Updates For Patch', async function() {
                 { op: 'add', path: '/a/1', value: 1 },
             ], { a: [2, 3] }, false, 2);
         });
+
+		it('should minimise updates when doing array inserts and removes', async function() {
+            await checkCoalescing(this.test.title, [
+                { op: 'add', path: '/a/-', value: 3 }, // 1
+                { op: 'add', path: '/a/-', value: 4 }, // 1
+                { op: 'remove', path: '/a/0' }, // 2+3
+                { op: 'remove', path: '/a/0' }, // 4+5
+                { op: 'add', path: '/b/-', value: 12 }, // 3
+                { op: 'remove', path: '/b/0' }, // 6+7
+                { op: 'remove', path: '/b/0' }, // 8+9
+            ], { a: [0, 1, 2], b: [10, 11] }, false, 10);
+        });
+
+		it('should minimise updates that add then remove', async function() {
+            await checkCoalescing(this.test.title, [
+                { op: 'add', path: '/a', value: { b: 'foo' } },
+                { op: 'remove', path: '/a/b' },
+                { op: 'remove', path: '/a' },
+            ], {}, false, 2);
+        });
     });
 
     describe('Standard JSON patch tests', function() {

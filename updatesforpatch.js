@@ -292,6 +292,31 @@ function combineSetUpdates(a, b) {
     return [update];
 }
 
+
+
+function combineUnsetUpdates(a, b) {
+    const update = cloneDeep(a);
+    for (const keyB in b.$unset) {
+        const valueB = b.$unset[keyB];
+        const { childKey, parentKey } = findRelatedUpdates(keyB, update.$unset);
+        if (parentKey) {
+            // The previous write to the parent value is now getting an update to one of its sub-values
+            const write = update.$unset[parentKey];
+            const subPath = keyB.slice(parentKey.length + 1); // Ignore the part of the path the updates share
+            // Alter the value being written in a, to add (or replace) the value being written in b
+            lodashSet(write, subPath, valueB);
+        } else if (childKey) {
+            // The old remove of the child is no longer relevant, it has been superceded by the remove of the parent
+            delete update.$unset[childKey]; 
+            update.$unset[keyB] = valueB;
+        } else {
+            // The remove doesn't partially overlap with any other pre-existing remove, so can just be added
+            update.$unset[keyB] = valueB;
+        }
+    }
+    return [update];
+}
+
 function isAppend(pushUpdate) {
     if (typeof(pushUpdate) === 'object') {
         if (pushUpdate.$position !==  undefined) {
@@ -369,6 +394,9 @@ function combineUpdates(a, b) {
 
     if (a.$set && b.$set) {
         return combineSetUpdates(a, b);
+    }
+    if (a.$unset && b.$unset) {
+        return combineUnsetUpdates(a, b);
     }
     if (a.$push && b.$push) {
         return combineArrayUpdates(a, b);
