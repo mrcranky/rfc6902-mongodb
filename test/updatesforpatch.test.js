@@ -14,9 +14,9 @@ describe('Updates For Patch', async function() {
     afterEach('Clear collection', clearCollection);
 
     const exampleDocument = {
-        foo: 'bar',
-        baz: ['bux', 'tux'],
-        sub: { middle: { bottom: 'foo' } },
+        'foo': 'bar',
+        'baz': ['bux', 'tux'],
+        'sub': { middle: { bottom: 'foo' } },
         '1key': 'value',
     };
 
@@ -29,14 +29,14 @@ describe('Updates For Patch', async function() {
         it('should not modify the original document passed in', async function() {
             const documentPrior = cloneDeep(exampleDocument);
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "move", "from": "/foo", "path": "/baz/0" },
+                { 'op': 'move', 'from': '/foo', 'path': '/baz/0' },
             ]);
             expect(documentPrior).to.deep.equal(exampleDocument);
         });
 
         it('should not modify the patch document passed in', async function() {
             const patch = [
-                { "op": "move", "from": "/foo", "path": "/baz/0" },
+                { 'op': 'move', 'from': '/foo', 'path': '/baz/0' },
             ];
             const patchPrior = cloneDeep(patch);
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, patch);
@@ -45,67 +45,67 @@ describe('Updates For Patch', async function() {
 
         it('should refuse patch documents with malformed operations', async function() {
             await expect(() => updatesForPatch([
-                { "op": "badop", "path": "/b", "value": "c" },
+                { 'op': 'badop', 'path': '/b', 'value': 'c' },
             ], exampleDocument)).to.throw('malformed patch');
             await expect(() => updatesForPatch([
-                { "path": "/b", "value": "c" }, // missing op
+                { 'path': '/b', 'value': 'c' }, // missing op
             ], exampleDocument)).to.throw('malformed patch');
             await expect(() => updatesForPatch([
-                { "op": "add", "value": "c" }, // missing path
+                { 'op': 'add', 'value': 'c' }, // missing path
             ], exampleDocument)).to.throw('malformed patch');
         });
 
         it('should refuse to apply patches where paths contain characters MongoDB does not support', async function() {
             await expect(() => updatesForPatch([
-                { "op": "add", "path": "/$badkey", "value": "x" },
+                { 'op': 'add', 'path': '/$badkey', 'value': 'x' },
             ], exampleDocument)).to.throw('not MongoDB-safe');
             await expect(() => updatesForPatch([
-                { "op": "add", "path": "/sub/$badkey", "value": "x" },
+                { 'op': 'add', 'path': '/sub/$badkey', 'value': 'x' },
             ], exampleDocument)).to.throw('not MongoDB-safe');
             await expect(() => updatesForPatch([
-                { "op": "add", "path": "/sub/.key", "value": "x" },
+                { 'op': 'add', 'path': '/sub/.key', 'value': 'x' },
             ], exampleDocument)).to.throw('not MongoDB-safe');
             await expect(() => updatesForPatch([
-                { "op": "add", "path": "/sub/key.subkey", "value": "x" },
+                { 'op': 'add', 'path': '/sub/key.subkey', 'value': 'x' },
             ], exampleDocument)).to.throw('not MongoDB-safe');
             await expect(() => updatesForPatch([
-                { "op": "add", "path": "/sub/key\0subkey", "value": "x" },
+                { 'op': 'add', 'path': '/sub/key\0subkey', 'value': 'x' },
             ], exampleDocument)).to.throw('not MongoDB-safe');
             await expect(() => updatesForPatch([
-                { "op": "add", "path": "/\0", "value": "x" },
+                { 'op': 'add', 'path': '/\0', 'value': 'x' },
             ], exampleDocument)).to.throw('not MongoDB-safe');
             await expect(() => updatesForPatch([
-                { "op": "add", "path": "/", "value": "x" },
+                { 'op': 'add', 'path': '/', 'value': 'x' },
             ], exampleDocument)).to.throw('not MongoDB-safe');
         });
 
         it('should refuse to apply patches where values contain characters MongoDB does not support', async function() {
             await expect(() => updatesForPatch([
-                { "op": "add", "path": "/badvalue", "value": { "$badkey1": "value" } },
+                { 'op': 'add', 'path': '/badvalue', 'value': { '$badkey1': 'value' } },
             ], exampleDocument)).to.throw('not MongoDB-safe');
             await expect(() => updatesForPatch([
-                { "op": "add", "path": "/badvalue", "value": [{ "$badkey1": "value" }] },
+                { 'op': 'add', 'path': '/badvalue', 'value': [{ '$badkey1': 'value' }] },
             ], exampleDocument)).to.throw('not MongoDB-safe');
             await expect(() => updatesForPatch([
-                { "op": "add", "path": "/badvalue", "value": { "nested": { "$badkey1": "value" } } },
+                { 'op': 'add', 'path': '/badvalue', 'value': { 'nested': { '$badkey1': 'value' } } },
             ], exampleDocument)).to.throw('not MongoDB-safe');
             await expect(() => updatesForPatch([
-                { "op": "add", "path": "/badvalue", "value": { "nested": { "": "value" } } },
+                { 'op': 'add', 'path': '/badvalue', 'value': { 'nested': { '': 'value' } } },
             ], exampleDocument)).to.throw('not MongoDB-safe');
             await expect(() => updatesForPatch([
-                { "op": "add", "path": "/badvalue", "value": { "nested.key": "value" } },
+                { 'op': 'add', 'path': '/badvalue', 'value': { 'nested.key': 'value' } },
             ], exampleDocument)).to.throw('not MongoDB-safe');
             await expect(() => updatesForPatch([
-                { "op": "add", "path": "/badvalue", "value": { ".key": "value" } },
+                { 'op': 'add', 'path': '/badvalue', 'value': { '.key': 'value' } },
             ], exampleDocument)).to.throw('not MongoDB-safe');
             await expect(() => updatesForPatch([
-                { "op": "add", "path": "/badvalue", "value": { "key.": "value" } },
+                { 'op': 'add', 'path': '/badvalue', 'value': { 'key.': 'value' } },
             ], exampleDocument)).to.throw('not MongoDB-safe');
             await expect(() => updatesForPatch([
-                { "op": "add", "path": "/badvalue", "value": { ".": "value" } },
+                { 'op': 'add', 'path': '/badvalue', 'value': { '.': 'value' } },
             ], exampleDocument)).to.throw('not MongoDB-safe');
             await expect(() => updatesForPatch([
-                { "op": "add", "path": "/badvalue", "value": { "foo$bar": "value" } },
+                { 'op': 'add', 'path': '/badvalue', 'value': { 'foo$bar': 'value' } },
             ], exampleDocument)).to.not.throw('not MongoDB-safe');
         });
     });
@@ -113,33 +113,33 @@ describe('Updates For Patch', async function() {
     describe('Add operations', function() {
         it('should support add value operations', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "add", "path": "/bar", "value": "mux" },
+                { 'op': 'add', 'path': '/bar', 'value': 'mux' },
             ]); 
         });
 
         it('should support add value operations in a nested document', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "add", "path": "/sub/foo", "value": "bar" },
+                { 'op': 'add', 'path': '/sub/foo', 'value': 'bar' },
             ]); 
         });
 
         it('should support building deep nesting through sequential operations', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "add", "path": "/top", "value": {} },
-                { "op": "add", "path": "/top/middle", "value": {} },
-                { "op": "add", "path": "/top/middle/bottom", "value": "bar" },
+                { 'op': 'add', 'path': '/top', 'value': {} },
+                { 'op': 'add', 'path': '/top/middle', 'value': {} },
+                { 'op': 'add', 'path': '/top/middle/bottom', 'value': 'bar' },
             ]); 
         });
 
         it('should support building deep nesting through a single operation', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "add", "path": "/top", "value": { "middle": { "bottom": "bar" } } },
+                { 'op': 'add', 'path': '/top', 'value': { 'middle': { 'bottom': 'bar' } } },
             ]); 
         });
 
         it('should refuse to add to an object which does not yet exist', async function() {
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "add", "path": "/pub/foo", "value": "bar" },
+                { 'op': 'add', 'path': '/pub/foo', 'value': 'bar' },
             ])).to.be.rejectedWith('path does not exist');
         });
     });
@@ -147,30 +147,30 @@ describe('Updates For Patch', async function() {
     describe('Remove operations', function() {
         it('should support remove value operations', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "remove", "path": "/foo" },
+                { 'op': 'remove', 'path': '/foo' },
             ]); 
         });
 
         it('should support remove value operations on keys which start with numbers', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "remove", "path": "/1key" },
+                { 'op': 'remove', 'path': '/1key' },
             ]); 
         });
 
         it('should support removing nested objects even if modified in previous operations', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "replace", "path": "/sub/middle/bottom", "value": "bar" },
-                { "op": "remove", "path": "/sub/middle/bottom" },
-                { "op": "remove", "path": "/sub" },
+                { 'op': 'replace', 'path': '/sub/middle/bottom', 'value': 'bar' },
+                { 'op': 'remove', 'path': '/sub/middle/bottom' },
+                { 'op': 'remove', 'path': '/sub' },
             ]); 
         });
 
         it('should refuse to remove from an object a field which does not exist', async function() {
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "remove", "path": "/pub" },
+                { 'op': 'remove', 'path': '/pub' },
             ])).to.be.rejectedWith('path does not exist');
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "remove", "path": "/pub/foo" },
+                { 'op': 'remove', 'path': '/pub/foo' },
             ])).to.be.rejectedWith('path does not exist');
         });
     });
@@ -178,13 +178,13 @@ describe('Updates For Patch', async function() {
     describe('Replace operations', function() {
         it('should support replace value operations', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "replace", "path": "/foo", value: "baz" },
+                { 'op': 'replace', 'path': '/foo', 'value': 'baz' },
             ]); 
         });
 
         it('should refuse to replace a field which does not exist', async function() {
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "replace", "path": "/notreal", "value": "mux" },
+                { 'op': 'replace', 'path': '/notreal', 'value': 'mux' },
             ])).to.be.rejectedWith('path which does not exist');
         });
     });
@@ -192,61 +192,61 @@ describe('Updates For Patch', async function() {
     describe('Add/replace/remove operations on arrays', function() {
         it('should support add to end of array operations', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "add", "path": "/baz/-", "value": "mux" },
+                { 'op': 'add', 'path': '/baz/-', 'value': 'mux' },
             ]); 
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "add", "path": "/baz/2", "value": "mux" },
+                { 'op': 'add', 'path': '/baz/2', 'value': 'mux' },
             ]); 
         });
 
         it('should support insert mid-array operations', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "add", "path": "/baz/0", "value": "mux" },
+                { 'op': 'add', 'path': '/baz/0', 'value': 'mux' },
             ]); 
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "add", "path": "/baz/1", "value": "mux" },
+                { 'op': 'add', 'path': '/baz/1', 'value': 'mux' },
             ]);
         });
 
         it('should support remove mid-array operations', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "remove", "path": "/baz/0" },
+                { 'op': 'remove', 'path': '/baz/0' },
             ]); 
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "remove", "path": "/baz/1" },
+                { 'op': 'remove', 'path': '/baz/1' },
             ]); 
         });
 
         it('should support replace value mid-array operations', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "replace", "path": "/baz/0", value: "mux" },
+                { 'op': 'replace', 'path': '/baz/0', 'value': 'mux' },
             ]); 
         });
 
         it('should refuse to add to an index outside of the bounds of the array', async function() {
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "add", "path": "/baz/-1", "value": "mux" },
+                { 'op': 'add', 'path': '/baz/-1', 'value': 'mux' },
             ])).to.be.rejectedWith('Out of bounds (lower)');
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "add", "path": "/baz/3", "value": "mux" },
+                { 'op': 'add', 'path': '/baz/3', 'value': 'mux' },
             ])).to.be.rejectedWith('Out of bounds (upper)');
         });
 
         it('should refuse to remove an index outside of the bounds of the array', async function() {
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "remove", "path": "/baz/-1", "value": "mux" },
+                { 'op': 'remove', 'path': '/baz/-1', 'value': 'mux' },
             ])).to.be.rejectedWith('Out of bounds (lower)');
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "remove", "path": "/baz/2", "value": "mux" },
+                { 'op': 'remove', 'path': '/baz/2', 'value': 'mux' },
             ])).to.be.rejectedWith('Out of bounds (upper)');
         });
 
         it('should refuse to replace an index outside of the bounds of the array', async function() {
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "replace", "path": "/baz/-1", "value": "mux" },
+                { 'op': 'replace', 'path': '/baz/-1', 'value': 'mux' },
             ])).to.be.rejectedWith('path which does not exist');
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "replace", "path": "/baz/2", "value": "mux" },
+                { 'op': 'replace', 'path': '/baz/2', 'value': 'mux' },
             ])).to.be.rejectedWith('path which does not exist');
         });
     });
@@ -254,28 +254,28 @@ describe('Updates For Patch', async function() {
     describe('Copy operations', function() {
         it('should support copy operations', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "copy", "from": "/baz", "path": "/maz" },
+                { 'op': 'copy', 'from': '/baz', 'path': '/maz' },
             ]); 
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "copy", "from": "/foo", "path": "/boo" },
+                { 'op': 'copy', 'from': '/foo', 'path': '/boo' },
             ]); 
         });
 
         it('should support copy operations from arrays', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "copy", "from": "/baz/0", "path": "/maz" },
+                { 'op': 'copy', 'from': '/baz/0', 'path': '/maz' },
             ]);
         });
 
         it('should support copy operations to arrays', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "copy", "from": "/foo", "path": "/baz/0" },
+                { 'op': 'copy', 'from': '/foo', 'path': '/baz/0' },
             ]);
         });
 
         it('should refuse to copy from a location which does not exist', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "copy", "from": "/nonexistent", "path": "/existent" },
+                { 'op': 'copy', 'from': '/nonexistent', 'path': '/existent' },
             ], 'from does not exist');
         });
     });
@@ -283,34 +283,34 @@ describe('Updates For Patch', async function() {
     describe('Move operations', function() {
         it('should support move operations', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "move", "from": "/baz", "path": "/maz" },
+                { 'op': 'move', 'from': '/baz', 'path': '/maz' },
             ]); 
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "move", "from": "/foo", "path": "/boo" },
+                { 'op': 'move', 'from': '/foo', 'path': '/boo' },
             ]); 
         });
 
         it('should support move operations from arrays', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "move", "from": "/baz/0", "path": "/maz" },
+                { 'op': 'move', 'from': '/baz/0', 'path': '/maz' },
             ]);
         });
 
         it('should support move operations to arrays', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "move", "from": "/foo", "path": "/baz/0" },
+                { 'op': 'move', 'from': '/foo', 'path': '/baz/0' },
             ]);
         });
 
         it('should refuse to move from a location which does not exist', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "move", "from": "/nonexistent", "path": "/existent" },
+                { 'op': 'move', 'from': '/nonexistent', 'path': '/existent' },
             ], 'from does not exist');
         });
 
         it('should refuse move operations to a child of the source', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "move", "from": "/sub", "path": "/sub/newchild" },
+                { 'op': 'move', 'from': '/sub', 'path': '/sub/newchild' },
             ], 'Cannot move object to a child of that object');
         });
     });
@@ -318,22 +318,22 @@ describe('Updates For Patch', async function() {
     describe('Test operations', function() {
         it('should respect test operation conditions that fail', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "test", "path": "/foo", "value": "cheese" }, // should fail
-                { "op": "replace", "path": "/foo", "value": "baz" },
+                { 'op': 'test', 'path': '/foo', 'value': 'cheese' }, // should fail
+                { 'op': 'replace', 'path': '/foo', 'value': 'baz' },
             ]);
         });
 
         it('should respect test operation conditions that succeed', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "test", "path": "/foo", "value": "bar" }, // should fail
-                { "op": "replace", "path": "/foo", "value": "baz" },
+                { 'op': 'test', 'path': '/foo', 'value': 'bar' }, // should fail
+                { 'op': 'replace', 'path': '/foo', 'value': 'baz' },
             ]);
         });
 
         it('should respect test operation conditions on non-existent fields', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
-                { "op": "test", "path": "/bar", "value": "cheese" }, // should fail
-                { "op": "replace", "path": "/foo", "value": "baz" },
+                { 'op': 'test', 'path': '/bar', 'value': 'cheese' }, // should fail
+                { 'op': 'replace', 'path': '/foo', 'value': 'baz' },
             ]);
         });
     });
@@ -341,9 +341,9 @@ describe('Updates For Patch', async function() {
     describe('Efficiency tests', function() {
         const checkCoalescing = async (title, patch, originalDocument, expectedError, limitOnUpdateCount) => {
             await checkUpdatesProduceCorrectResult(title, originalDocument, patch, expectedError, limitOnUpdateCount);
-        }
+        };
 
-		it('should minimise updates that add/replace fields', async function() {
+        it('should minimise updates that add/replace fields', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'add', path: '/a', value: { b: 'foo' } },
                 { op: 'replace', path: '/a/b', value: 'bar' },
@@ -352,7 +352,7 @@ describe('Updates For Patch', async function() {
             ], {}, false, 1);
         });
 
-		it('should minimise updates when adding / removing nested structure', async function() {
+        it('should minimise updates when adding / removing nested structure', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'add', path: '/a', value: {} },
                 { op: 'add', path: '/a/b', value: {} },
@@ -362,14 +362,14 @@ describe('Updates For Patch', async function() {
             ], {}, false, 1);
         });
 
-		it('should minimise updates when later operations override previous operations', async function() {
+        it('should minimise updates when later operations override previous operations', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'add', path: '/a/b', value: { b: 'foo' } }, // Replace just one field
                 { op: 'replace', path: '/a', value: { c: 'bar' } }, // Replace the entire object
             ], { a: {} }, false, 1);
         });
 
-		it('should minimise updates when later operations partly modify previous operations', async function() {
+        it('should minimise updates when later operations partly modify previous operations', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'add', path: '/a', value: { b: 'foo' } }, // Set an entire object
                 { op: 'replace', path: '/a/b', value: 'bar' }, // Replace just one field of that object
@@ -377,7 +377,7 @@ describe('Updates For Patch', async function() {
             ], { a: {} }, false, 1);
         });
 
-		it('should minimise updates when doing complex sequential patches', async function() {
+        it('should minimise updates when doing complex sequential patches', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'add', path: '/a', value: 'foo' },
                 { op: 'add', path: '/b', value: {} },
@@ -389,7 +389,7 @@ describe('Updates For Patch', async function() {
             ], {}, false, 4);
         });
 
-		it('should minimise updates when doing array appends', async function() {
+        it('should minimise updates when doing array appends', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'add', path: '/a/-', value: 3 },
                 { op: 'add', path: '/a/-', value: 4 },
@@ -397,7 +397,7 @@ describe('Updates For Patch', async function() {
             ], { a: [0, 1, 2] }, false, 1);
         });
 
-		it('should minimise updates when doing array appends to different keys', async function() {
+        it('should minimise updates when doing array appends to different keys', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'add', path: '/a/-', value: 3 },
                 { op: 'add', path: '/a/-', value: 4 },
@@ -405,7 +405,7 @@ describe('Updates For Patch', async function() {
             ], { a: [0, 1, 2], b: [] }, false, 1);
         });
 
-		it('should minimise updates when doing contiguous array inserts in reverse order', async function() {
+        it('should minimise updates when doing contiguous array inserts in reverse order', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'add', path: '/a/0', value: 2 }, // 1 (reverse order)
                 { op: 'add', path: '/a/0', value: 1 },
@@ -413,7 +413,7 @@ describe('Updates For Patch', async function() {
             ], { a: [3, 4] }, false, 1);
         });
 
-		it('should minimise updates when doing contiguous array inserts in forward order', async function() {
+        it('should minimise updates when doing contiguous array inserts in forward order', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'add', path: '/b/0', value: 10 }, // forward order, but different key so can be merged
                 { op: 'add', path: '/b/1', value: 11 },
@@ -421,7 +421,7 @@ describe('Updates For Patch', async function() {
             ], { b: [] }, false, 1);
         });
 
-		it('should minimise updates when doing contiguous array inserts out of order', async function() {
+        it('should minimise updates when doing contiguous array inserts out of order', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'add', path: '/a/1', value: 3 }, // 1
                 { op: 'add', path: '/a/1', value: 1 },
@@ -429,7 +429,7 @@ describe('Updates For Patch', async function() {
             ], { a: [0, 4] }, false, 1);
         });
 
-		it('should minimise updates when doing non-contiguous array inserts', async function() {
+        it('should minimise updates when doing non-contiguous array inserts', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'add', path: '/a/2', value: 4 },
                 { op: 'add', path: '/a/0', value: 0 }, // Non-contiguous with first so forces a 2nd update
@@ -437,7 +437,7 @@ describe('Updates For Patch', async function() {
             ], { a: [2, 3] }, false, 2);
         });
 
-		it('should minimise updates when doing array inserts and removes', async function() {
+        it('should minimise updates when doing array inserts and removes', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'add', path: '/a/-', value: 3 }, // 1
                 { op: 'add', path: '/a/-', value: 4 }, // 1
@@ -449,14 +449,14 @@ describe('Updates For Patch', async function() {
             ], { a: [0, 1, 2], b: [10, 11] }, false, 10);
         });
 
-		it('should minimise updates that add then remove', async function() {
+        it('should minimise updates that add then remove', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'add', path: '/a', value: { b: 'foo' } },
                 { op: 'remove', path: '/a/b' },
             ], {}, false, 1);
         });
 
-		it('should recognise add/remove updates that cancel each other out', async function() {
+        it('should recognise add/remove updates that cancel each other out', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'add', path: '/a', value: { b: 'foo' } },
                 { op: 'remove', path: '/a/b' },
@@ -464,7 +464,7 @@ describe('Updates For Patch', async function() {
             ], {}, false, 0);
         });
 
-		it('should minimise updates that alternate adding then removing', async function() {
+        it('should minimise updates that alternate adding then removing', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'add', path: '/a', value: { b: 'foo' } },
                 { op: 'remove', path: '/a/b' },
@@ -473,7 +473,7 @@ describe('Updates For Patch', async function() {
             ], {}, false, 1);
         });
 
-		it('should minimise updates when moving multiple things', async function() {
+        it('should minimise updates when moving multiple things', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'add', path: '/a', value: { b: 'foo' } },
                 { op: 'add', path: '/d', value: { b: 'foo' } },
@@ -483,7 +483,7 @@ describe('Updates For Patch', async function() {
             ], {}, false, 4);
         });
 
-		it('should minimise updates when copying multiple things', async function() {
+        it('should minimise updates when copying multiple things', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'copy', from: '/a', path: '/d' },
                 { op: 'copy', from: '/a/x', path: '/a/y' },

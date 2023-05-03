@@ -390,7 +390,7 @@ function combineArrayUpdates(a, b) {
                             ...appendB.items,
                         ],
                         $position: startIndex,
-                    }
+                    };
                 } else if (writeB.$position === startIndex) {
                     // B is being inserted at the same index as A (i.e. just before all the items added by A)
                     update.$push[keyB] = {
@@ -399,7 +399,7 @@ function combineArrayUpdates(a, b) {
                             ...appendA.items,
                         ],
                         $position: startIndex,
-                    }
+                    };
                 } else if ((writeB.$position > startIndex) && (writeB.$position < endIndex)) {
                     const items = [...appendA.items];
                     const relativePosition = writeB.$position - startIndex;
@@ -407,7 +407,7 @@ function combineArrayUpdates(a, b) {
                     update.$push[keyB] = {
                         $position: startIndex,
                         $each: items,
-                    }
+                    };
                 } else {
                     return [a, b]; // Can't combine
                 }
@@ -483,7 +483,7 @@ export default function updatesForPatch(patch, originalDocument) {
     const updates = [];
     const currentDocument = cloneDeep(originalDocument);
     for (const operation of patch) {
-        if (typeof(operation) !== 'object') { throw new Error('malformed patch operation (not an object)') }
+        if (typeof(operation) !== 'object') { throw new Error('malformed patch operation (not an object)'); }
         if (operation.path === undefined) { throw new Error ('malformed patch operation (no path)'); }
 
         if (operation.op === 'add') {
