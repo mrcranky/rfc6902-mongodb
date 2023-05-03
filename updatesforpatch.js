@@ -1,6 +1,7 @@
 import { applyPatch } from 'rfc6902';
 import cloneDeep from 'lodash.clonedeep';
 import lodashSet from 'lodash.set';
+import lodashUnset from 'lodash.unset';
 import isEqual from 'lodash.isequal';
 import { v4 as uuid } from 'uuid';
 
@@ -256,7 +257,7 @@ function passesTestOperation(operation, currentDocument) {
 }
 
 function findRelatedUpdates(path, updateDocument) {
-    for (const key in updateDocument) {
+    for (const key in (updateDocument || {})) {
         if (path.startsWith(`${key}.`)) {
             return { parentKey: key }; // a key exists which is a parent of the path we care about 
         }
@@ -267,21 +268,35 @@ function findRelatedUpdates(path, updateDocument) {
     return {};
 }
 
-function combineSetUpdates(a, b) {
+function combineSetAndUnsetUpdates(a, b) {
     const update = cloneDeep(a);
+    if (!update.$set) { update.$set = {}; }
+    if (!update.$unset) { update.$unset = {}; }
+
     for (const keyB in b.$set) {
         const valueB = b.$set[keyB];
-        const { childKey, parentKey } = findRelatedUpdates(keyB, update.$set);
-        if (parentKey) {
-            // The previous write to the parent value is now getting an update to one of its sub-values
-            const write = update.$set[parentKey];
-            const subPath = keyB.slice(parentKey.length + 1); // Ignore the part of the path the updates share
+        const { childKey: childKeyBeingWrittenTo, parentKey: parentKeyBeingWrittenTo } = findRelatedUpdates(keyB, update.$set);
+        const { childKey: childKeyBeingRemoved, parentKey: parentKeyBeingRemoved } = findRelatedUpdates(keyB, update.$unset);
+        if (parentKeyBeingRemoved) {
+            // We can't combine the removal with a new write, must leave unmerged so that the removal completes first
+            return [a, b];
+        }
+        if (childKeyBeingRemoved) {
+            // A part of the object was going to be removed, but now we are replacing a parent so that removal is
+            // irrelevant
+            delete update.$unset[childKeyBeingRemoved];
+        }
+        if (childKeyBeingWrittenTo) {
+            // The old write to the child is no longer relevant, it has been superceded by the write to the parent
+            delete update.$set[childKeyBeingWrittenTo]; 
+        }
+
+        if (parentKeyBeingWrittenTo) {
+            // A previous write to the parent value is now getting an update to one of its sub-values
+            const write = update.$set[parentKeyBeingWrittenTo];
+            const subPath = keyB.slice(parentKeyBeingWrittenTo.length + 1); // Ignore the part of the path the updates share
             // Alter the value being written in a, to add (or replace) the value being written in b
             lodashSet(write, subPath, valueB);
-        } else if (childKey) {
-            // The old write to the child is no longer relevant, it has been superceded by the write to the parent
-            delete update.$set[childKey]; 
-            update.$set[keyB] = valueB;
         } else {
             // The write doesn't partially overlap with any other pre-existing writes, so can just be added
             // If the key has already been written in a previous update, this will replace the previous write
@@ -289,32 +304,48 @@ function combineSetUpdates(a, b) {
             update.$set[keyB] = valueB;
         }
     }
-    return [update];
-}
 
-
-
-function combineUnsetUpdates(a, b) {
-    const update = cloneDeep(a);
     for (const keyB in b.$unset) {
         const valueB = b.$unset[keyB];
-        const { childKey, parentKey } = findRelatedUpdates(keyB, update.$unset);
-        if (parentKey) {
-            // The previous write to the parent value is now getting an update to one of its sub-values
-            const write = update.$unset[parentKey];
-            const subPath = keyB.slice(parentKey.length + 1); // Ignore the part of the path the updates share
-            // Alter the value being written in a, to add (or replace) the value being written in b
-            lodashSet(write, subPath, valueB);
-        } else if (childKey) {
-            // The old remove of the child is no longer relevant, it has been superceded by the remove of the parent
-            delete update.$unset[childKey]; 
-            update.$unset[keyB] = valueB;
+        const { childKey: childKeyBeingWrittenTo, parentKey: parentKeyBeingWrittenTo } = findRelatedUpdates(keyB, update.$set);
+        const { childKey: childKeyBeingRemoved, parentKey: parentKeyBeingRemoved } = findRelatedUpdates(keyB, update.$unset);
+        if (parentKeyBeingRemoved) {
+            throw new Error('Somehow deleting a child of a sub-document that was already removed');
+        }
+        if (childKeyBeingRemoved) {
+            // This remove supersedes the previous removal, so drop it
+            delete update.$unset[childKeyBeingRemoved];
+        }
+        if (childKeyBeingWrittenTo) {
+            // The remove renders a previous write to a child value irrelevant
+            delete update.$set[childKeyBeingWrittenTo];
+        }
+        if (update.$set[keyB]) {
+            // The whole key that is being removed was previously written, so that write is now irrelevant
+            delete update.$set[keyB];
+        }
+
+        if (parentKeyBeingWrittenTo) {
+            // We're now removing part of a previously written larger object
+            const write = update.$set[parentKeyBeingWrittenTo];
+            const subPath = keyB.slice(parentKeyBeingWrittenTo.length + 1); // Ignore the part of the path the updates share
+            // Scrub the portion of the parent object that is now being removed
+            lodashUnset(write, subPath);
         } else {
-            // The remove doesn't partially overlap with any other pre-existing remove, so can just be added
+            // Include the removal in the merged update
             update.$unset[keyB] = valueB;
         }
     }
-    return [update];
+
+    // Clean up in case the merge left us with no more updates of a particular type
+    if (update.$set && Object.keys(update.$set).length === 0) { delete update.$set; }
+    if (update.$unset && Object.keys(update.$unset).length === 0) { delete update.$unset; }
+
+    if (update.$set || update.$unset) {
+        return [update];
+    } else {
+        return []; // Merged updates have cancelled each other out
+    }
 }
 
 function isAppend(pushUpdate) {
@@ -392,11 +423,8 @@ function combineArrayUpdates(a, b) {
 function combineUpdates(a, b) {
     if (!a) { return [b]; } // When there is no previous update to combine with
 
-    if (a.$set && b.$set) {
-        return combineSetUpdates(a, b);
-    }
-    if (a.$unset && b.$unset) {
-        return combineUnsetUpdates(a, b);
+    if ((a.$set || a.$unset) && (b.$set || b.$unset)) {
+        return combineSetAndUnsetUpdates(a, b);
     }
     if (a.$push && b.$push) {
         return combineArrayUpdates(a, b);

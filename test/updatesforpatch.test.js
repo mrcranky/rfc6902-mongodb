@@ -377,6 +377,18 @@ describe('Updates For Patch', async function() {
             ], { a: {} }, false, 1);
         });
 
+		it('should minimise updates when doing complex sequential patches', async function() {
+            await checkCoalescing(this.test.title, [
+                { op: 'add', path: '/a', value: 'foo' },
+                { op: 'add', path: '/b', value: {} },
+                { op: 'add', path: '/b/c', value: 'bar' },
+                { op: 'replace', path: '/b/c', value: 'baz' }, // 1
+                { op: 'move', from: '/b', path: '/c' }, // 2
+                { op: 'copy', from: '/c', path: '/d' }, // 3
+                { op: 'remove', path: '/c' }, // 4
+            ], {}, false, 4);
+        });
+
 		it('should minimise updates when doing array appends', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'add', path: '/a/-', value: 3 },
@@ -441,8 +453,43 @@ describe('Updates For Patch', async function() {
             await checkCoalescing(this.test.title, [
                 { op: 'add', path: '/a', value: { b: 'foo' } },
                 { op: 'remove', path: '/a/b' },
+            ], {}, false, 1);
+        });
+
+		it('should recognise add/remove updates that cancel each other out', async function() {
+            await checkCoalescing(this.test.title, [
+                { op: 'add', path: '/a', value: { b: 'foo' } },
+                { op: 'remove', path: '/a/b' },
                 { op: 'remove', path: '/a' },
-            ], {}, false, 2);
+            ], {}, false, 0);
+        });
+
+		it('should minimise updates that alternate adding then removing', async function() {
+            await checkCoalescing(this.test.title, [
+                { op: 'add', path: '/a', value: { b: 'foo' } },
+                { op: 'remove', path: '/a/b' },
+                { op: 'add', path: '/c', value: { d: 'foo' } },
+                { op: 'remove', path: '/c/d' },
+            ], {}, false, 1);
+        });
+
+		it('should minimise updates when moving multiple things', async function() {
+            await checkCoalescing(this.test.title, [
+                { op: 'add', path: '/a', value: { b: 'foo' } },
+                { op: 'add', path: '/d', value: { b: 'foo' } },
+                { op: 'move', from: '/a', path: '/b' },
+                { op: 'move', from: '/d', path: '/c' },
+                { op: 'remove', path: '/c' },
+            ], {}, false, 4);
+        });
+
+		it('should minimise updates when copying multiple things', async function() {
+            await checkCoalescing(this.test.title, [
+                { op: 'copy', from: '/a', path: '/d' },
+                { op: 'copy', from: '/a/x', path: '/a/y' },
+                { op: 'copy', from: '/c', path: '/a' }, // Overwrite previous value
+                { op: 'copy', from: '/d', path: '/a' },
+            ], { a: { x: 'foo' }, c: 'bar' }, false, 1);
         });
     });
 
