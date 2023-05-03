@@ -220,7 +220,7 @@ function updatesForCopyOperation(operation, currentDocument) {
 
     // Copies are effectively 'add using the value at [from]', so we replicate the same behaviour as 'add'
     // so that if for example the target is an array, the new value is inserted rather than replaced.
-    return updatesToAddValue(deconstructedToPath, previousValue);
+    return updatesToAddValue(deconstructedToPath, cloneDeep(previousValue));
 }
 
 function updatesForMoveOperation(operation, currentDocument) {
