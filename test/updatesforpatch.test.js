@@ -554,6 +554,7 @@ describe('Updates For Patch', async function() {
                 const testErrorCases = [
                     'number is not equal to string',
                     'test op should fail',
+                    'string not equivalent',
                 ];
                 const expectTestFailureNotError = (testErrorCases.indexOf(standardTest.error) >= 0);
                 const hardError = expectTestFailureNotError ? undefined : standardTest.error;
