@@ -2,7 +2,7 @@ import { applyPatch } from 'rfc6902';
 import cloneDeep from 'lodash.clonedeep';
 import lodashSet from 'lodash.set';
 import lodashUnset from 'lodash.unset';
-import isEqual from 'lodash.isequal';
+import isEqualWith from 'lodash.isequalwith';
 import { v4 as uuid } from 'uuid';
 
 function keyIsMongoSafe(key) {
@@ -249,14 +249,21 @@ function updatesForMoveOperation(operation, currentDocument) {
 }
 
 function passesTestOperation(operation, currentDocument) {
+    function compareWithoutTypeCoercion(a, b) {
+        // Catch cases where the values being compared differ, and refuse to consider them equal even if they
+        // could be coerced to a type that made them equivalent
+        if (typeof(a) !== typeof(b)) {
+            return false;
+        }
+    }
     if (operation.path) {
         const deconstructedPath = deconstructPath(operation.path, currentDocument);
         const { value } = deconstructedPath;
 
-        return isEqual(value, operation.value);
+        return isEqualWith(value, operation.value, compareWithoutTypeCoercion);
     } else {
         // testing the whole document
-        return isEqual(operation.value, currentDocument);
+        return isEqualWith(operation.value, currentDocument, compareWithoutTypeCoercion);
     }
 }
 
