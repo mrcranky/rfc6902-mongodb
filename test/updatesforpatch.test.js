@@ -142,6 +142,19 @@ describe('Updates For Patch', async function() {
                 { 'op': 'add', 'path': '/pub/foo', 'value': 'bar' },
             ])).to.be.rejectedWith('path does not exist');
         });
+
+        it('should support add value operations with paths that require escaping', async function() {
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { 'op': 'add', 'path': '/~0', 'value': 'foo' },
+                { 'op': 'add', 'path': '/~1', 'value': 'bar' },
+            ]); 
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { 'op': 'add', 'path': '/~somekey', 'value': 'foo' },
+            ]); 
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { 'op': 'add', 'path': '/~01', 'value': 'foo' },
+            ]); 
+        });
     });
 
     describe('Remove operations', function() {

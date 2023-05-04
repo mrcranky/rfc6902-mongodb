@@ -13,6 +13,10 @@ function keyIsMongoSafe(key) {
     return true;
 }
 
+function unescapeKey(key) {
+    return key.replace(/~1/g, '/').replace(/~0/g, '~');
+}
+
 function documentIsMongoSafe(document) {
     if (typeof(document) === 'object') {
         for (const key in document) {
@@ -40,7 +44,7 @@ function deconstructPath(patchPath, document) {
         throw new Error('invalid path for operation');
     }
 
-    const pathElements = patchPath.split('/'); 
+    const pathElements = patchPath.split('/').map(unescapeKey); 
     pathElements.shift(); // Remove the empty path element produced by the leading slash
     const fieldName = pathElements.pop();
     if (!keyIsMongoSafe(fieldName)) {
