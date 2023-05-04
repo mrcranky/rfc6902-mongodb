@@ -51,7 +51,7 @@ export async function checkUpdatesProduceCorrectResult(message, originalDocument
     if (expectedError) {
         expect(() => {
             updatesForPatch(patch, originalDocument);
-        }).to.throw; // NB: We don't check what the error is, just that one is thrown
+        }).to.throw(); // NB: We don't check what the error is, just that one is thrown
         return originalDocument;
     } else {
         const referenceDocument = cloneDeep(originalDocument);

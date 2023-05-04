@@ -519,6 +519,9 @@ describe('Updates For Patch', async function() {
             /.*replace whole document.*/,
             /.*replacing the root of the document.*/,
 
+            // Not a patch issue but a JSON parsing question
+            /.*duplicate ops.*/,
+
             // Not supported because they would produce a document with empty keys
             /.*Add. \/ target.*/,
             /.*Add. \/foo\/ deep target.*/,
@@ -547,7 +550,14 @@ describe('Updates For Patch', async function() {
         for (const [index, standardTest] of Object.entries(filteredTests)) {
             const name = standardTest.comment || standardTest.error || `#${index} (${JSON.stringify(standardTest.patch)})`;
             it(`should pass standard test case: ${name}`, async function() {
-                await checkUpdatesProduceCorrectResult(this.test.title, standardTest.doc, standardTest.patch, standardTest.error);
+                // Not all errors in the standard test set are expected to cause throws
+                const testErrorCases = [
+                    'number is not equal to string',
+                    'test op should fail',
+                ];
+                const expectTestFailureNotError = (testErrorCases.indexOf(standardTest.error) >= 0);
+                const hardError = expectTestFailureNotError ? undefined : standardTest.error;
+                await checkUpdatesProduceCorrectResult(this.test.title, standardTest.doc, standardTest.patch, hardError);
             });
         }
     });
