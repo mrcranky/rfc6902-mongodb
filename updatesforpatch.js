@@ -233,6 +233,9 @@ function updatesForMoveOperation(operation, currentDocument) {
     if (deconstructedFromPath.mongoPath === deconstructedToPath.mongoPath) {
         return []; // No-op, move to self
     }
+    if (deconstructedToPath.mongoPath.startsWith(deconstructedFromPath.mongoPath)) {
+        throw new Error('move operation must not specify path which is a child of from');
+    }
 
     const { value: previousValue } = deconstructedFromPath;
     if (previousValue === undefined) { throw new Error('copy refers to from path which does not exist'); }
