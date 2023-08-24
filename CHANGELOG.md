@@ -1,0 +1,18 @@
+
+# Change Log
+All notable changes to this project will be documented in this file.
+ 
+The format is based on [Keep a Changelog](http://keepachangelog.com/)
+and this project adheres to [Semantic Versioning](http://semver.org/).
+ 
+## [0.1.2] - 2023-08-24
+  
+### Changed
+- Minor dependency updates to address security advisories (all in devDependencies)
+ 
+## [0.1.1] - 2023-05-04
+ 
+### Fixed
+- Make behaviour conformant with most remaining tests from https://github.com/json-patch/json-patch-tests/blob/master/spec_tests.json
+- Fix behaviour for RFC6902/4.4: The "from" location MUST NOT be a proper prefix of the "path" location; i.e., a location cannot be moved into one of its children.
+ 
