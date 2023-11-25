@@ -12,6 +12,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Minor dependency updates to address security advisories; all but one (uuid patch to 9.0.1) in devDependencies
+- Major dev dependency updates, no breaking changes so no updates needed:
+    - mongodb to 6.3.0
+    - mongodb-memory-server to 9.1.1
+    - eslint-plugin-n to 16.3.1
  
 ## [0.1.2] - 2023-08-24
   
