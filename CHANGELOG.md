@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
  
-## New release
+## [0.1.3] - 2023-11-25
   
 ### Fixed
 - [Issue #1](https://github.com/mrcranky/rfc6902-mongodb/issues/1): Appending objects to arrays over multiple patch operations was not handled correctly
