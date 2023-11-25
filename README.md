@@ -1,8 +1,8 @@
 Helper module for generating a sequence of MongoDB document update operations 
 that will transform a document in line with an RFC6902 JSON Patch document.
-Builds on top of the [https://www.npmjs.com/package/rfc6902](rfc6902) module, 
+Builds on top of the [rfc6902](https://www.npmjs.com/package/rfc6902) module, 
 and produces update operation documents that should work with the standard 
-[https://www.npmjs.com/package/mongodb](mongodb) driver.
+[mongodb](https://www.npmjs.com/package/mongodb) driver.
 
 ## Usage
 
