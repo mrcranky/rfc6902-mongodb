@@ -363,10 +363,15 @@ function combineSetAndUnsetUpdates(a, b) {
 }
 
 function isAppend(pushUpdate) {
-    if (typeof(pushUpdate) === 'object') {
-        if (pushUpdate.$position !==  undefined) {
+    // pushUpdate conforms to https://www.mongodb.com/docs/manual/reference/operator/update/push
+    // If there are modifiers that specify a particular position to insert at, it's not an append
+    // All other cases should be treated as appends
+    if ((typeof(pushUpdate) === 'object') && (pushUpdate.$each !== undefined)) {
+        if (pushUpdate.$position !== undefined) {
             return { append: false, items: pushUpdate.$each };
         } else {
+            // It's a MongoDB operator spec, but one which inserts at the end, not mid-array
+            // so still treat it as an append
             return { append: true, items: pushUpdate.$each };
         }
     } else {

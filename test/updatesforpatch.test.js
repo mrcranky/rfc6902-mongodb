@@ -212,6 +212,19 @@ describe('Updates For Patch', async function() {
             ]); 
         });
 
+        it('should allow multiple appends to end of array', async function() {
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { 'op': 'add', 'path': '/baz/-', 'value': 'mux' },
+                { 'op': 'add', 'path': '/baz/-', 'value': 'bux' },
+            ]); 
+            // Also check that values which are objects are handled correctly (need to add
+            // multiple values to properly exercise the update coalescing code)
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { 'op': 'add', 'path': '/baz/-', 'value': { key: 'mux' } },
+                { 'op': 'add', 'path': '/baz/-', 'value': { key: 'bux' } },
+            ]); 
+        });
+
         it('should support insert mid-array operations', async function() {
             await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
                 { 'op': 'add', 'path': '/baz/0', 'value': 'mux' },
