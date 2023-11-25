@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   
 ### Fixed
 - [Issue #1](https://github.com/mrcranky/rfc6902-mongodb/issues/1): Appending objects to arrays over multiple patch operations was not handled correctly
+
+### Changed
+- Minor dependency updates to address security advisories; all but one (uuid patch to 9.0.1) in devDependencies
  
 ## [0.1.2] - 2023-08-24
   
