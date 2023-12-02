@@ -1,3 +1,6 @@
+[![latest version published to npm](https://badge.fury.io/js/rfc6902-mongodb.svg)](https://www.npmjs.com/package/rfc6902-mongodb)
+[![monthly downloads from npm](https://img.shields.io/npm/dm/rfc6902-mongodb.svg?style=flat)](https://www.npmjs.com/package/rfc6902-mongodb)
+
 Helper module for generating a sequence of MongoDB document update operations 
 that will transform a document in line with an RFC6902 JSON Patch document.
 Builds on top of the [rfc6902](https://www.npmjs.com/package/rfc6902) module, 
