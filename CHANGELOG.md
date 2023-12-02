@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
  
-## Unreleased
+## [0.1.6] - 2023-12-02
   
 ### Fixed
 - [Issue #2](https://github.com/mrcranky/rfc6902-mongodb/issues/2): Picking up rfc6902@5.1.1 with a better fix for the array related issues
