@@ -25,7 +25,7 @@
   "devDependencies": {
     "chai": "^4.3.10",
     "chai-as-promised": "^7.1.1",
-    "eslint": "^8.54.0",
+    "eslint": "^8.55.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.29.0",
     "eslint-plugin-n": "^16.3.1",
@@ -39,7 +39,7 @@
     "lodash.isequalwith": "^4.4.0",
     "lodash.set": "^4.3.2",
     "lodash.unset": "^4.5.2",
-    "rfc6902": "^5.0.1",
+    "rfc6902": "^5.1.1",
     "uuid": "^9.0.1"
   }
 }

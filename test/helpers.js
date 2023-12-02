@@ -56,10 +56,7 @@ export async function checkUpdatesProduceCorrectResult(message, originalDocument
         return originalDocument;
     } else {
         const referenceDocument = cloneDeep(originalDocument);
-        // NB: We clone the patch, because applyPatch has the potential to modify it 
-        // in certain edge cases. Inefficient, but needed until we can get a version
-        // of rfc6902 that makes sure the patch is kept constant
-        const patchResults = applyPatch(referenceDocument, cloneDeep(patch));
+        const patchResults = applyPatch(referenceDocument, patch);
         const testErrors = patchResults.filter(result => {
             return result?.name === 'TestError';
         });

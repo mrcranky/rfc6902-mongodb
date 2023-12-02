@@ -523,10 +523,7 @@ export default function updatesForPatch(patch, originalDocument) {
             throw new Error('malformed patch operation (unknown or missing op field)');
         }
 
-        // NB: We clone the patch operation, because applyPatch has the potential to modify it 
-        // in certain edge cases. Inefficient, but needed until we can get a version
-        // of rfc6902 that makes sure the patch is kept constant
-        applyPatch(currentDocument, [cloneDeep(operation)]); // Apply just this operation to the document to track its current state
+        applyPatch(currentDocument, [operation]); // Apply just this operation to the document to track its current state
     }
     
     return compactUpdates(updates);
