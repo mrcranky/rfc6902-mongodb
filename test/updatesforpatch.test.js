@@ -249,6 +249,14 @@ describe('Updates For Patch', async function() {
             ]); 
         });
 
+        it('should correctly handle appending to an array added by a previous replace (issue #2)', async function() {
+            await checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
+                { 'op': 'replace', 'path': '/baz', 'value': [] },
+                { 'op': 'add', 'path': '/baz/-', 'value': 'mux' },
+                { 'op': 'add', 'path': '/baz/-', 'value': 'bux' },
+            ]); 
+        });
+
         it('should refuse to add to an index outside of the bounds of the array', async function() {
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
                 { 'op': 'add', 'path': '/baz/-1', 'value': 'mux' },

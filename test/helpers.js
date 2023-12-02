@@ -48,6 +48,7 @@ export async function checkUpdatesProduceCorrectResult(message, originalDocument
     expect(insertResult.acknowledged).to.be.true;
     const query = { _id: insertResult.insertedId };
 
+
     if (expectedError) {
         expect(() => {
             updatesForPatch(patch, originalDocument);
@@ -55,7 +56,10 @@ export async function checkUpdatesProduceCorrectResult(message, originalDocument
         return originalDocument;
     } else {
         const referenceDocument = cloneDeep(originalDocument);
-        const patchResults = applyPatch(referenceDocument, patch);
+        // NB: We clone the patch, because applyPatch has the potential to modify it 
+        // in certain edge cases. Inefficient, but needed until we can get a version
+        // of rfc6902 that makes sure the patch is kept constant
+        const patchResults = applyPatch(referenceDocument, cloneDeep(patch));
         const testErrors = patchResults.filter(result => {
             return result?.name === 'TestError';
         });

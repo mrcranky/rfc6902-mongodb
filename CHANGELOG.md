@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
  
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+ 
+## [Unreleased]
+  
+### Fixed
+- [Issue #2](https://github.com/mrcranky/rfc6902-mongodb/issues/2): Inserting then modifying array values would not produce correct results
 
 ## [0.1.4] - 2023-11-25
 
