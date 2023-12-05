@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [0.2.0] - 2023-12-05
 
 ### Changed
 - Use rollup to build both CJS and ESM forms of the module so that 
