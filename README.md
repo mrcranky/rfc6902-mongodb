@@ -13,6 +13,7 @@ NB: the following examples assume you are using the standard mongodb driver, set
 which is not included here.
 ```js
 import { updatesForPatch } from 'rfc6902-mongodb';
+// Or const { updatesForPatch } = require('rfc6902-mongodb');
 
 const exampleDocument = {
     "biscuits": [

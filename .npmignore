@@ -1,5 +1,5 @@
-.eslintrc.cjs
-test
-.gitignore
-.github
-.vscode
+**/*
+!dist/*
+!CHANGELOG.md
+!README.md
+!LICENSE

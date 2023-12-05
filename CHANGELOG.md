@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
  
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
+
+## Unreleased
+
+### Changed
+- Use rollup to build both CJS and ESM forms of the module so that 
+`require('rfc6902-mongodb')` will also work
  
 ## [0.1.6] - 2023-12-02
   

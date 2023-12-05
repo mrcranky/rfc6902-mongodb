@@ -2,8 +2,11 @@
   "name": "rfc6902-mongodb",
   "version": "0.1.6",
   "description": "Helper module for generating a sequence of MongoDB document update operations that will transform a document in line with an RFC6902 JSON Patch document.",
-  "main": "index.js",
   "type": "module",
+  "exports": {
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs"
+  },
   "repository": {
     "url": "https://github.com/mrcranky/rfc6902-mongodb"
   },
@@ -11,7 +14,12 @@
     "registry": "https://registry.npmjs.org"
   },
   "scripts": {
-    "test": "mocha"
+    "build": "npm run buildCJS && npm run buildESM",
+    "buildCJS": "npx rollup index.js --file ./dist/index.cjs --format cjs",
+    "buildESM": "npx rollup index.js --file ./dist/index.js --format esm",
+    "lint": "npx eslint .",
+    "test": "mocha",
+    "prepublishOnly": "npm run lint && npm run test && npm run build"
   },
   "keywords": [
     "rfc6902",
@@ -32,7 +40,8 @@
     "eslint-plugin-promise": "^6.1.1",
     "mocha": "^10.2.0",
     "mongodb": "^6.3.0",
-    "mongodb-memory-server": "^9.1.1"
+    "mongodb-memory-server": "^9.1.1",
+    "rollup": "^4.6.1"
   },
   "dependencies": {
     "lodash.clonedeep": "^4.5.0",
