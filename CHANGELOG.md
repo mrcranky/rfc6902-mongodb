@@ -10,6 +10,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Fixed
 - [Issue #3](https://github.com/mrcranky/rfc6902-mongodb/issues/3): Modifying an array that was a child of another array that also modified in the same patch would generate a conflicting update
 
+### Changed
+- Minor dependency updates to address security advisories, all in devDependencies
 
 ## [1.0.1] - 2023-12-10
 
