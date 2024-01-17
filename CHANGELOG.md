@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## Unreleased
+  
+### Fixed
+- [Issue #3](https://github.com/mrcranky/rfc6902-mongodb/issues/3): Modifying an array that was a child of another array that also modified in the same patch would generate a conflicting update
+
+
 ## [1.0.1] - 2023-12-10
 
 ### Changed

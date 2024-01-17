@@ -257,6 +257,22 @@ describe('Updates For Patch', async function() {
             ]); 
         });
 
+        it('should allow updating multiple arrays with common paths(issue #3)', async function() {
+            const nestedArrayDocument = {
+                parentArray: [
+                    { id: 'a', childArray: [] }
+                ]
+            };
+            await checkUpdatesProduceCorrectResult(this.test.title, nestedArrayDocument, [
+                { op: 'add', path: '/parentArray/0/childArray/0', value: { id: '1' } },
+                { op: 'add', path: '/parentArray/1', value: { id: 'b' } },
+            ]);
+            await checkUpdatesProduceCorrectResult(this.test.title, nestedArrayDocument, [
+                { op: 'add', path: '/parentArray/1', value: { id: 'b' } },
+                { op: 'add', path: '/parentArray/0/childArray/0', value: { id: '1' } },
+            ]);
+        });
+        
         it('should refuse to add to an index outside of the bounds of the array', async function() {
             await expect(checkUpdatesProduceCorrectResult(this.test.title, exampleDocument, [
                 { 'op': 'add', 'path': '/baz/-1', 'value': 'mux' },

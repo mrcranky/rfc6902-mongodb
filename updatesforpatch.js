@@ -432,7 +432,17 @@ function combineArrayUpdates(a, b) {
                 }
             }
         } else {
-            // Writing to unrelated arrays, just do both
+            // Writing to different arrays, need to check if one is a parent of the other
+            for (const keyA in a.$push) {
+                if (keyA.startsWith(keyB)) {
+                    // Update B writes to a parent of A
+                    return [a, b]; // Can't combine
+                }
+                if (keyB.startsWith(keyA)) {
+                    // Update B writes to a child of A
+                    return [a, b]; // Can't combine
+                }
+            }
             update.$push[keyB] = writeB;
         }
     }
