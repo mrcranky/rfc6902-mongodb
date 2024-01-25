@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## Unreleased
+## [1.0.3] - 2024-01-25
   
 ### Changed
 - Shifted to using lodash-es@4.17.21 to avoid a high severity vulnerability (since the [per-method packages are effectively deprecated](https://github.com/lodash/lodash/issues/3838#issuecomment-398592530))
