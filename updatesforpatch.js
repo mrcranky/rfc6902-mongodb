@@ -1,8 +1,8 @@
 import { applyPatch } from 'rfc6902';
-import cloneDeep from 'lodash.clonedeep';
-import lodashSet from 'lodash.set';
-import lodashUnset from 'lodash.unset';
-import isEqualWith from 'lodash.isequalwith';
+import cloneDeep  from 'lodash-es/clonedeep.js';
+import lodashSet  from 'lodash-es/set.js';
+import lodashUnset from 'lodash-es/unset.js';
+import isEqualWith from 'lodash-es/isequalwith.js';
 import { v4 as uuid } from 'uuid';
 
 function keyIsMongoSafe(key) {

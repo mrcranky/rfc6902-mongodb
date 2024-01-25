@@ -41,13 +41,10 @@
     "mocha": "^10.2.0",
     "mongodb": "^6.3.0",
     "mongodb-memory-server": "^9.1.6",
-    "rollup": "^4.9.5"
+    "rollup": "^4.9.6"
   },
   "dependencies": {
-    "lodash.clonedeep": "^4.5.0",
-    "lodash.isequalwith": "^4.4.0",
-    "lodash.set": "^4.3.2",
-    "lodash.unset": "^4.5.2",
+    "lodash-es": "^4.17.21",
     "rfc6902": "^5.1.1",
     "uuid": "^9.0.1"
   }

@@ -5,7 +5,7 @@ import mongodb from 'mongodb';
 import { applyPatch } from 'rfc6902';
 
 import { updatesForPatch } from '../index.js'; // module under test
-import cloneDeep from 'lodash.clonedeep';
+import cloneDeep from 'lodash-es/clonedeep.js';
 
 const { MongoClient } = mongodb;
 

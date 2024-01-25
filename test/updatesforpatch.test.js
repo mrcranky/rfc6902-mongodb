@@ -3,7 +3,7 @@ import path from 'path';
 import chai, { expect } from 'chai';
 import chaiAsPromised from 'chai-as-promised';
 import { openDB, closeDB, clearCollection, checkUpdatesProduceCorrectResult } from './helpers.js';
-import cloneDeep from 'lodash.clonedeep';
+import cloneDeep from 'lodash-es/clonedeep.js';
 import updatesForPatch from '../updatesforpatch.js';
 
 chai.use(chaiAsPromised);
