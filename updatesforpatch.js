@@ -1,9 +1,8 @@
 import { applyPatch } from 'rfc6902';
-import cloneDeep  from 'lodash-es/clonedeep.js';
-import lodashSet  from 'lodash-es/set.js';
-import lodashUnset from 'lodash-es/unset.js';
-import isEqualWith from 'lodash-es/isequalwith.js';
+import lodash from 'lodash';
 import { v4 as uuid } from 'uuid';
+
+const { cloneDeep, set: lodashSet, unset: lodashUnset, isEqualWith } = lodash;
 
 function keyIsMongoSafe(key) {
     if (key.startsWith('$')) { return false; }
