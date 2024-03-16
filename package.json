@@ -34,15 +34,15 @@
   "devDependencies": {
     "chai": "^4.4.1",
     "chai-as-promised": "^7.1.1",
-    "eslint": "^8.56.0",
+    "eslint": "^8.57.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^16.6.2",
     "eslint-plugin-promise": "^6.1.1",
-    "mocha": "^10.2.0",
-    "mongodb": "^6.3.0",
-    "mongodb-memory-server": "^9.1.6",
-    "rollup": "^4.9.6"
+    "mocha": "^10.3.0",
+    "mongodb": "^6.5.0",
+    "mongodb-memory-server": "^9.1.7",
+    "rollup": "^4.13.0"
   },
   "dependencies": {
     "lodash": "^4.17.21",
