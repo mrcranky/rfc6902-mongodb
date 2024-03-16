@@ -1,14 +1,14 @@
 import fs from 'fs';
 import path from 'path';
-import chai, { expect } from 'chai';
-import chaiAsPromised from 'chai-as-promised';
+import { use, expect } from 'chai';
+import chaiAsPromised from '@rvagg/chai-as-promised';
 import { openDB, closeDB, clearCollection, checkUpdatesProduceCorrectResult } from './helpers.js';
 import lodash from 'lodash';
 import updatesForPatch from '../updatesforpatch.js';
 
 const { cloneDeep } = lodash;
 
-chai.use(chaiAsPromised);
+use(chaiAsPromised);
 
 describe('Updates For Patch', async function() {
     before('Set up mongo server', openDB);
