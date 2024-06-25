@@ -2,13 +2,16 @@ import { expect } from 'chai';
 import { openDB, closeDB, clearCollection } from './helpers.js';
 
 // Test of the test rig (does not exercise module code)
-describe('Test that mongodb updates can be performed', async function() {
+describe('Test that mongodb updates can be performed', function() {
     let collection;
+
     before('Set up mongo server', async function() {
         const results = await openDB();
         collection = results.collection;
     });
+
     after('Close client', closeDB);
+
     afterEach('Clear collection', clearCollection);
 
     it('can insert a simple document and retrieve it after', async function() {

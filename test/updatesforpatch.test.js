@@ -10,9 +10,11 @@ const { cloneDeep } = lodash;
 
 use(chaiAsPromised);
 
-describe('Updates For Patch', async function() {
+describe('Updates For Patch', function() {
     before('Set up mongo server', openDB);
+    
     after('Close client', closeDB);
+    
     afterEach('Clear collection', clearCollection);
 
     const exampleDocument = {
@@ -546,6 +548,8 @@ describe('Updates For Patch', async function() {
     });
 
     describe('Standard JSON patch tests', function() {
+        /* eslint mocha/no-setup-in-describe: "off" */ // Because we're generating dynamic tests here
+
         // Loop through all the test patches in the standard set.
         // Aside from a few unsupported operations we skip, all should pass.
         // Tests are taken from https://github.com/json-patch/json-patch-tests/blob/master/tests.json

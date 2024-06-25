@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Minor and patch updates to development packages
+- Update to eslint@9
 
 ## [1.0.6] - 2024-03-26
   
