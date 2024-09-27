@@ -33,14 +33,14 @@
   "license": "MIT",
   "devDependencies": {
     "@eslint/js": "^9.5.0",
-    "@rvagg/chai-as-promised": "^8.0.1",
-    "chai": "^5.1.0",
-    "eslint": "^9.5.0",
-    "eslint-plugin-mocha": "^10.4.3",
-    "mocha": "^10.3.0",
-    "mongodb": "^6.5.0",
-    "mongodb-memory-server": "^9.1.7",
-    "rollup": "^4.13.0"
+    "@rvagg/chai-as-promised": "^8.0.2",
+    "chai": "^5.1.1",
+    "eslint": "^9.11.1",
+    "eslint-plugin-mocha": "^10.5.0",
+    "mocha": "^10.7.3",
+    "mongodb": "^6.9.0",
+    "mongodb-memory-server": "^9.4.1",
+    "rollup": "^4.22.5"
   },
   "dependencies": {
     "lodash": "^4.17.21",
