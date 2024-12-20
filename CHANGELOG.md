@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.10] - 2024-12-20
+
+### Changed
+- Major dependency update: uuid@11
+- Major development dependency updates: mocha@11, mongodb-memory-server
+- Minor and patch updates to development packages
+
+### Fixed
+- Fixed tests timing out on first run
+
 ## [1.0.9] - 2024-09-27
 
 ### Changed
