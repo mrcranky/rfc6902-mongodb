@@ -6,6 +6,7 @@ describe('Test that mongodb updates can be performed', function() {
     let collection;
 
     before('Set up mongo server', async function() {
+        this.timeout(10000); // More generous timeout because mongo memory service can take a while to set up
         const results = await openDB();
         collection = results.collection;
     });
