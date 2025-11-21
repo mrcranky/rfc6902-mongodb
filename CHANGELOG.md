@@ -5,10 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## ?
+## [1.0.11] - 2025-11-21
 
 ### Changed
-- Minor and patch updates to development packages and uuid
+- Minor and patch updates to development packages and uuid (will squish a security advisory from indirect use of glob)
 
 
 ## [1.0.10] - 2024-12-20
