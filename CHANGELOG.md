@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## ?
+
+### Changed
+- Minor and patch updates to development packages and uuid
+
+
 ## [1.0.10] - 2024-12-20
 
 ### Changed

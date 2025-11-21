@@ -34,17 +34,17 @@
   "devDependencies": {
     "@eslint/js": "^9.5.0",
     "@rvagg/chai-as-promised": "^8.0.2",
-    "chai": "^5.1.2",
-    "eslint": "^9.17.0",
+    "chai": "^5.3.3",
+    "eslint": "^9.39.1",
     "eslint-plugin-mocha": "^10.5.0",
-    "mocha": "^11.0.1",
-    "mongodb": "^6.12.0",
-    "mongodb-memory-server": "^10.1.2",
-    "rollup": "^4.29.0"
+    "mocha": "^11.7.5",
+    "mongodb": "^6.21.0",
+    "mongodb-memory-server": "^10.3.0",
+    "rollup": "^4.53.3"
   },
   "dependencies": {
     "lodash": "^4.17.21",
     "rfc6902": "^5.1.2",
-    "uuid": "^11.0.3"
+    "uuid": "^11.1.0"
   }
 }
