@@ -4,7 +4,6 @@
 name: Node.js CI
 
 permissions:
-  id-token: write  # Required for OIDC
   contents: read
 
 on:
