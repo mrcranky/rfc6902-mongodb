@@ -5,7 +5,7 @@ name: Node.js Package
 
 permissions:
   id-token: write  # Required for OIDC
-  contents: write  # Needed to publish to git
+  contents: read
 
 on:
   release:
@@ -22,4 +22,4 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: npm ci
       - run: npm test
-      - run: npm publish --dry-run --verbose
+      - run: npm publish --verbose

@@ -5,10 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.0.16] - 2026-02-04
+## [1.0.13] through [1.0.23] - 2026-02-04
 
 ### Changed
-- Minor changes to CI process
+- Various CI process changes to try and resolve publishing issues
 
 
 ## [1.0.12] - 2026-02-04
