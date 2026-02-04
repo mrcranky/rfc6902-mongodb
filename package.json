@@ -12,6 +12,8 @@
     "url": "git+https://github.com/mrcranky/rfc6902-mongodb.git"
   },
   "publishConfig": {
+    "access": "public",
+    "provenance": true,
     "registry": "https://registry.npmjs.org"
   },
   "scripts": {
