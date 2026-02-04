@@ -592,6 +592,7 @@ describe('Updates For Patch', function() {
         });
         for (const [index, standardTest] of Object.entries(filteredTests)) {
             const name = standardTest.comment || standardTest.error || `#${index} (${JSON.stringify(standardTest.patch)})`;
+
             it(`should pass standard test case: ${name}`, async function() {
                 // Not all errors in the standard test set are expected to cause throws
                 const testErrorCases = [

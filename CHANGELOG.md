@@ -5,11 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.12] - 2026-02-04
+
+### Changed
+- Patch update to lodash to squish a security advisory
+- Updates to development packages (notably chai@6, mongodb@7, mongodb-memory-server@11)
+- Minor changes to CI process
+
 ## [1.0.11] - 2025-11-21
 
 ### Changed
 - Minor and patch updates to development packages and uuid (will squish a security advisory from indirect use of glob)
-
 
 ## [1.0.10] - 2024-12-20
 

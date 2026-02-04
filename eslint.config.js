@@ -3,7 +3,7 @@ import mochaPlugin from 'eslint-plugin-mocha';
 
 export default [
     js.configs.recommended,
-    mochaPlugin.configs.flat.recommended,
+    mochaPlugin.configs.recommended,
     {
         rules: {
             // Some basic style rules
