@@ -22,4 +22,4 @@ jobs:
           registry-url: https://registry.npmjs.org/
       - run: npm ci
       - run: npm test
-      - run: npm publish --dry-run
+      - run: npm publish --dry-run --verbose
