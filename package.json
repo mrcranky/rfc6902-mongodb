@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/mrcranky/rfc6902-mongodb"
+    "url": "https://github.com/mrcranky/rfc6902-mongodb"
   },
   "publishConfig": {
     "access": "public",
