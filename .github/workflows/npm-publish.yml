@@ -5,7 +5,7 @@ name: Node.js Package
 
 permissions:
   id-token: write  # Required for OIDC
-  contents: read
+  contents: write  # Needed to publish to git
 
 on:
   release:
