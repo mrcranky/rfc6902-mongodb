@@ -1,6 +1,6 @@
 {
   "name": "rfc6902-mongodb",
-  "version": "1.0.19",
+  "version": "1.0.20",
   "description": "Helper module for generating a sequence of MongoDB document update operations that will transform a document in line with an RFC6902 JSON Patch document.",
   "type": "module",
   "exports": {
