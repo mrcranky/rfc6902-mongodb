@@ -23,4 +23,4 @@ jobs:
       - run: npm install -g npm@latest # Update NPM to get the 11.5.1 build or later required for trusted publishing
       - run: npm ci
       - run: npm test
-      - run: npm publish
+      - run: npm publish --provenance
