@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [1.0.24] - ??
+
+### Changed
+- Minor dependency update: rfc6902@5.2 - performance improvements
+- Minor and patch updates to development packages to squish some but not all security advisories
+
+
 ## [1.0.13] through [1.0.23] - 2026-02-04
 
 ### Changed

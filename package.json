@@ -37,16 +37,16 @@
     "@eslint/js": "^9.39.2",
     "@rvagg/chai-as-promised": "^8.0.2",
     "chai": "^6.2.2",
-    "eslint": "^9.39.2",
+    "eslint": "^9.39.4",
     "eslint-plugin-mocha": "^11.2.0",
     "mocha": "^11.7.5",
-    "mongodb": "^7.1.0",
+    "mongodb": "^7.1.1",
     "mongodb-memory-server": "^11.0.1",
-    "rollup": "^4.57.1"
+    "rollup": "^4.60.0"
   },
   "dependencies": {
     "lodash": "^4.17.23",
-    "rfc6902": "^5.1.2",
+    "rfc6902": "^5.2.0",
     "uuid": "^11.1.0"
   }
 }
