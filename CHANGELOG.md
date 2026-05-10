@@ -5,7 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## [1.0.24] - ??
+## [2.0.0] - 2026-05-10
+
+### Breaking
+- Dropped support for Node 16 and 18; module itself will probably still work but dev
+ dependency updates mean it cannot be tested
 
 ### Changed
 - Minor dependency update: rfc6902@5.2 - performance improvements
