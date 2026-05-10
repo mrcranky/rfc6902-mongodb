@@ -9,7 +9,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Minor dependency update: rfc6902@5.2 - performance improvements
-- Minor dependency update: lodash@18 - security fixes
 - Minor and patch updates to development packages to squish some but not all security advisories
 - Upgraded to latest (v6) github runners
 
