@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+## [2.0.1] - 2026-07-28
+
+### Changed
+- Minor and patch dev dependency updates (eslint, @eslint/js, eslint-plugin-mocha, mocha, mongodb, mongodb-memory-server, rollup)
+- Minor and patch dependency updates (rfc6902, uuid)
+
 ## [2.0.0] - 2026-05-10
 
 ### Breaking
